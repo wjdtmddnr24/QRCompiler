@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.web.*?>
+<?import javafx.scene.text.*?>
+<?import com.jfoenix.controls.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+
+<StackPane fx:id="root" minHeight="450.0" minWidth="900.0" prefHeight="720.0" prefWidth="1280.0" stylesheets="snackbar_styles.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
+   <children>
+      <BorderPane>
+         <center>
+            <BorderPane BorderPane.alignment="CENTER">
+               <center>
+                  <JFXTabPane fx:id="tabpane" BorderPane.alignment="CENTER">
+                     <tabs>
+                        <Tab text="메인">
+                          <content>
+                              <VBox fx:id="editpane">
+                                 <children>
+                                    <SplitPane dividerPositions="0.7190923317683882" prefHeight="1581.0" prefWidth="1280.0">
+                                      <items>
+                                          <BorderPane minWidth="600.0">
+                                             <bottom>
+                                                <JFXTextArea BorderPane.alignment="CENTER" />
+                                             </bottom>
+                                             <center>
+                                                <HTMLEditor htmlText="&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body contenteditable=&quot;true&quot;&gt;&lt;/body&gt;&lt;/html&gt;" prefHeight="200.0" prefWidth="506.0" BorderPane.alignment="CENTER" />
+                                             </center>
+                                          </BorderPane>
+                                          <BorderPane fx:id="bpane" minWidth="300.0" stylesheets="@snackbar_styles.css">
+                                             <center>
+                                                <JFXButton buttonType="RAISED" onAction="#save" prefHeight="32.0" prefWidth="66.0" style="-fx-background-color: #1E88E5;" text="버튼" textFill="WHITE" BorderPane.alignment="CENTER">
+                                                   <font>
+                                                      <Font name="Roboto Regular" size="12.0" />
+                                                   </font>
+                                                </JFXButton>
+                                             </center>
+                                          </BorderPane>
+                                      </items>
+                                    </SplitPane>
+                                 </children>
+                              </VBox>
+                          </content>
+                        </Tab>
+                        <Tab text="서버" />
+                     </tabs></JFXTabPane>
+               </center>
+            </BorderPane>
+         </center>
+         <top>
+            <MenuBar BorderPane.alignment="CENTER">
+              <menus>
+                <Menu mnemonicParsing="false" text="파일">
+                  <items>
+                    <MenuItem mnemonicParsing="false" onAction="#saveSource" text="저장" />
+                  </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="편집">
+                  <items>
+                    <MenuItem mnemonicParsing="false" text="Delete" />
+                  </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="도움말">
+                  <items>
+                    <MenuItem mnemonicParsing="false" onAction="#about" text="About" />
+                        <MenuItem mnemonicParsing="false" text="HI" />
+                  </items>
+                </Menu>
+              </menus>
+            </MenuBar>
+         </top>
+      </BorderPane>
+   </children>
+</StackPane>
