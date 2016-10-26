@@ -24,6 +24,7 @@
       <element id="module-output" name="QRCompiler_test" />
       <element id="library" level="project" name="Gradle: junit:junit:4.11" />
       <element id="library" level="project" name="Gradle: org.hamcrest:hamcrest-core:1.3" />
+      <element id="library" level="project" name="Gradle: org.apache.commons:commons-lang3:3.0" />
     </root>
   </artifact>
 </component>

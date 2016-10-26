@@ -8,12 +8,11 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
-import javafx.scene.input.Clipboard;
-import javafx.scene.input.DataFormat;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
+import javafx.scene.input.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -40,13 +39,17 @@ public class Controller {
     private WebView editwebview;
 
     @FXML
-    private JFXComboBox<String> comboBox;
-
+    private ComboBox<String> comboBoxStyle;
+    @FXML
+    private ComboBox<Integer> comboBoxSize;
+    @FXML
+    private ComboBox<Label> comboBoxFont;
 
     @FXML
     private JFXTabPane tabpane;
 
     private JFXSnackbar snackbar;
+    private String[] themes = new String[]{"xcode", "ambiance", "chaos", "chrome", "clouds", "clouds_midnight", "cobalt", "crimson_editor", "dawn", "dreamweaver", "clipse", "github", "idle_fingers", "iplastic", "katzenmilch", "kr_theme", "kuroir", "merbivore", "merbivore_soft", "mono_industrial", "monokai", "pastel_on_dark", "solarized_dark", "solarized_light", "sqlserver", "terminal", "textmate", "tomorrow", "tomorrow_night", "tomorrow_night_blue", "tomorrow_night_bright", "tomorrow_night_eighties", "twilight", "vibrant_ink"};
 
     @FXML
     void save(ActionEvent event) {
@@ -57,6 +60,9 @@ public class Controller {
         String query = "editor.insert('" + content + "');";
         System.out.print(query);
         editwebview.getEngine().executeScript(query);
+        if (!editwebview.isFocused()) {
+            editwebview.requestFocus();
+        }
 
     }
 
@@ -93,40 +99,21 @@ public class Controller {
         snackbar.getStylesheets().add(getClass().getResource("snackbar_styles.css").toExternalForm());
         snackbar.setId("snackbar");
         snackbar.setStyle("-fx-text-fill: #FFFFFF;");
-
         editwebview.getEngine().setJavaScriptEnabled(true);
         editwebview.getEngine().load(getClass().getResource("src-noconflict/index.html").toExternalForm());
-        editwebview.getEngine().documentProperty().addListener(new ChangeListener<Document>() {
+   /*editwebview.getEngine().documentProperty().addListener(new ChangeListener<Document>() {
             public void changed(ObservableValue<? extends Document> prop, Document oldDoc, Document newDoc) {
                 enableFirebug(editwebview.getEngine());
             }
         });
+*/
+        setListenerEditWebView(editwebview);
 
-        editwebview.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
-            public void handle(KeyEvent event) {
-                if (event.isControlDown() && event.getCode() == KeyCode.V) {
-                    final Clipboard clipBoard = Clipboard.getSystemClipboard();
-                    String content = (String) clipBoard.getContent(DataFormat.PLAIN_TEXT);
-                    content = StringEscapeUtils.escapeEcmaScript(content);
-                    String query = "editor.insert('" + content + "');";
-                    editwebview.getEngine().executeScript(query);
-                    editwebview.getEngine().executeScript("editor.setTheme(\"ace/theme/dracula\");");
+        setupcomboBoxStyle(comboBoxStyle);
+        setupComboBoxSize(comboBoxSize);
+        setupcomboBoxFont(comboBoxFont);
+        System.out.println(Font.getFamilies());
 
-                }
-            }
-        });
-
-
-        comboBox.getStylesheets().add(getClass().getResource("combobox.css").toExternalForm());
-        comboBox.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent event) {
-                String theme = comboBox.getSelectionModel().getSelectedItem();
-                System.out.println("editor.setTheme(\"ace/theme/" + theme + "\");");
-                editwebview.getEngine().executeScript("editor.setTheme(\"ace/theme/" + theme + "\");");
-            }
-        });
-        setComboBoxItems(comboBox);
-        comboBox.getSelectionModel().select(0);
 
     }
 
@@ -134,41 +121,94 @@ public class Controller {
         editwebview.getEngine().executeScript("if (!document.getElementById('FirebugLite')){E = document['createElement' + 'NS'] && document.documentElement.namespaceURI;E = E ? document['createElement' + 'NS'](E, 'script') : document['createElement']('script');E['setAttribute']('id', 'FirebugLite');E['setAttribute']('src', 'https://getfirebug.com/' + 'firebug-lite.js' + '#startOpened');E['setAttribute']('FirebugLite', '4');(document['getElementsByTagName']('head')[0] || document['getElementsByTagName']('body')[0]).appendChild(E);E = new Image;E['setAttribute']('src', 'https://getfirebug.com/' + '#startOpened');}");
     }
 
-    private void setComboBoxItems(ComboBox<String> comboBox) {
-        comboBox.getItems().add("ambiance");
-        comboBox.getItems().add("chaos");
-        comboBox.getItems().add("chrome");
-        comboBox.getItems().add("clouds");
-        comboBox.getItems().add("clouds_midnight");
-        comboBox.getItems().add("cobalt");
-        comboBox.getItems().add("crimson_editor");
-        comboBox.getItems().add("dawn");
-        comboBox.getItems().add("dreamweaver");
-        comboBox.getItems().add("clipse");
-        comboBox.getItems().add("github");
-        comboBox.getItems().add("idle_fingers");
-        comboBox.getItems().add("iplastic");
-        comboBox.getItems().add("katzenmilch");
-        comboBox.getItems().add("kr_theme");
-        comboBox.getItems().add("kuroir");
-        comboBox.getItems().add("merbivore");
-        comboBox.getItems().add("merbivore_soft");
-        comboBox.getItems().add("mono_industrial");
-        comboBox.getItems().add("monokai");
-        comboBox.getItems().add("pastel_on_dark");
-        comboBox.getItems().add("solarized_dark");
-        comboBox.getItems().add("solarized_light");
-        comboBox.getItems().add("sqlserver");
-        comboBox.getItems().add("terminal");
-        comboBox.getItems().add("textmate");
-        comboBox.getItems().add("tomorrow");
-        comboBox.getItems().add("tomorrow_night");
-        comboBox.getItems().add("tomorrow_night_blue");
-        comboBox.getItems().add("tomorrow_night_bright");
-        comboBox.getItems().add("tomorrow_night_eighties");
-        comboBox.getItems().add("twilight");
-        comboBox.getItems().add("vibrant_ink");
-        comboBox.getItems().add("xcode");
+    private void setListenerEditWebView(final WebView editwebview) {
+        editwebview.addEventHandler(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
+            public void handle(KeyEvent event) {
+                if (event.isControlDown() && event.getCode() == KeyCode.V) {
+                    final Clipboard clipBoard = Clipboard.getSystemClipboard();
+                    String content = (String) clipBoard.getContent(DataFormat.PLAIN_TEXT);
+                    if (content == null) {
+                        return;
+                    }
+                    content = StringEscapeUtils.escapeEcmaScript(content);
+                    String query = "editor.insert('" + content + "');";
+                    editwebview.getEngine().executeScript(query);
+                }
+                if (event.isControlDown() && event.getCode() == KeyCode.S) {
+                    //TODO 저장 기능
+                    snackbar.show("저장되었습니다.", 2000);
+                }
+            }
+        });
+        editwebview.setOnScroll(new EventHandler<ScrollEvent>() {
+            public void handle(ScrollEvent event) {
+                if (event.isControlDown() && event.getDeltaY() < 0) {
+                    System.out.println("down");
+                    if (comboBoxSize.getSelectionModel().getSelectedIndex() > 0) {
+                        comboBoxSize.getSelectionModel().select(comboBoxSize.getSelectionModel().getSelectedIndex() - 1);
+                        int size = comboBoxSize.getSelectionModel().getSelectedItem();
+                        System.out.println("document.getElementById('editor').style.fontSize='" + size + "px';");
+                        editwebview.getEngine().executeScript("document.getElementById('editor').style.fontSize='" + size + "px';");
+                    }
+                }
+                if (event.isControlDown() && event.getDeltaY() > 1) {
+                    System.out.println("up");
+                    if (comboBoxSize.getSelectionModel().getSelectedIndex() < comboBoxSize.getItems().size() - 1) {
+                        comboBoxSize.getSelectionModel().select(comboBoxSize.getSelectionModel().getSelectedIndex() + 1);
+                        int size = comboBoxSize.getSelectionModel().getSelectedItem();
+                        System.out.println("document.getElementById('editor').style.fontSize='" + size + "px';");
+                        editwebview.getEngine().executeScript("document.getElementById('editor').style.fontSize='" + size + "px';");
+                    }
+                }
+            }
+        });
+    }
+
+    private void setupComboBoxSize(final ComboBox<Integer> comboBoxSize) {
+        for (int i = 0; i < 11; i++) {
+            this.comboBoxSize.getItems().add(10 + i * 2);
+        }
+        comboBoxSize.getSelectionModel().select(3);
+        comboBoxSize.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent event) {
+                int size = comboBoxSize.getSelectionModel().getSelectedItem();
+                System.out.println("document.getElementById('editor').style.fontSize='" + size + "px';");
+                editwebview.getEngine().executeScript("document.getElementById('editor').style.fontSize='" + size + "px';");
+            }
+        });
+    }
+
+    private void setupcomboBoxStyle(final ComboBox<String> comboBoxStyle) {
+        for (int i = 0; i < themes.length; i++) {
+            this.comboBoxStyle.getItems().add(themes[i]);
+        }
+        comboBoxStyle.getSelectionModel().selectFirst();
+        comboBoxStyle.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent event) {
+                String theme = comboBoxStyle.getSelectionModel().getSelectedItem();
+                System.out.println("editor.setTheme(\"ace/theme/" + theme + "\");");
+                editwebview.getEngine().executeScript("editor.setTheme(\"ace/theme/" + theme + "\");");
+            }
+        });
 
     }
+
+    private void setupcomboBoxFont(final ComboBox<Label> comboBoxFont) {
+
+
+        for (int i = 0; i < Font.getFamilies().size(); i++) {
+            Label label = new Label(Font.getFamilies().get(i));
+            label.setFont(Font.font(Font.getFamilies().get(i)));
+            label.setStyle("-fx-text-fill: rgb(100.0, 100.0, 100.0)");
+
+            comboBoxFont.getItems().add(label);
+        }
+        comboBoxFont.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent event) {
+                String fontfamily = comboBoxFont.getSelectionModel().getSelectedItem().getText();
+                editwebview.getEngine().executeScript("editor.setOptions({fontFamily: \"" + fontfamily + "\"});");
+            }
+        });
+    }
+
 }

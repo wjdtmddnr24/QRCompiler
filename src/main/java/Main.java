@@ -11,6 +11,7 @@ public class Main extends Application {
         Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
         primaryStage.setTitle("Hello World");
         Scene scene = new Scene(root, 1280, 720);
+        scene.getStylesheets().add(getClass().getResource("material-fx-v0_3.css").toExternalForm());
 
         primaryStage.setMinHeight(550);
         primaryStage.setMinWidth(950);
