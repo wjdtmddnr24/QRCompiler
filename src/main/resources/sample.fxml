@@ -27,7 +27,7 @@
                                  <children>
                                     <SplitPane dividerPositions="0.7190923317683882" prefHeight="1581.0" prefWidth="1280.0">
                                       <items>
-                                          <BorderPane minWidth="600.0">
+                                          <BorderPane fx:id="editborderPane" minWidth="600.0">
                                              <center>
                                                 <WebView fx:id="editwebview" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
                                              </center>
@@ -41,7 +41,7 @@
                                                             <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="10.0" percentWidth="1.0" prefWidth="100.0" />
                                                             <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="10.0" percentWidth="1.0" prefWidth="100.0" />
                                                             <ColumnConstraints />
-                                                     
+
                                                                </columnConstraints>
                                                          <rowConstraints>
                                                             <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
@@ -60,15 +60,14 @@
                                                 </HBox>
                                              </top>
                                           </BorderPane>
-                                          <BorderPane fx:id="bpane" minWidth="300.0" stylesheets="@snackbar_styles.css">
+                                          <BorderPane fx:id="QRPANEQ" maxWidth="350.0" minWidth="350.0" prefWidth="350.0" stylesheets="@snackbar_styles.css">
                                              <center>
-                                                <JFXButton buttonType="RAISED" onAction="#save" prefHeight="32.0" prefWidth="66.0" style="-fx-background-color: #1E88E5;" text="버튼" textFill="WHITE" BorderPane.alignment="CENTER">
-                                                   <font>
-                                                      <Font name="Roboto Regular" size="12.0" />
-                                                   </font>
-                                                </JFXButton>
-                                             </center>
-                                          </BorderPane>
+                                                <JFXListView fx:id="qrlistView" BorderPane.alignment="CENTER">
+                                                   <effect>
+                                                      <Blend />
+                                                   </effect>
+                                                </JFXListView>
+                                             </center></BorderPane>
                                       </items>
                                     </SplitPane>
                                  </children>
@@ -85,7 +84,7 @@
               <menus>
                 <Menu mnemonicParsing="false" text="파일">
                   <items>
-                    <MenuItem mnemonicParsing="false" text="코드 열기" />
+                    <MenuItem mnemonicParsing="false" onAction="#openSourceCode" text="코드 열기" />
                         <MenuItem mnemonicParsing="false" text="QR코드 열기" />
                         <MenuItem mnemonicParsing="false" onAction="#saveSource" text="저장" />
                         <MenuItem mnemonicParsing="false" text="닫기" />
