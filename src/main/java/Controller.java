@@ -69,6 +69,12 @@ public class Controller {
     private JFXDialog closeDialog;
     private JFXDialog aboutDialog;
 
+    public void setStage(Stage stage) {
+        this.stage = stage;
+    }
+
+    private Stage stage;
+
     @FXML
     void openSourceCode(ActionEvent event) {
         System.out.println("OPEN");
@@ -168,6 +174,7 @@ public class Controller {
                         Platform.runLater(new Runnable() {
                             public void run() {
                                 editwebview.getEngine().executeScript("editor.setValue('" + StringEscapeUtils.escapeEcmaScript(value) + "')");
+                                stage.setTitle(workingSourceCodeFile != null ? new String("QR Compiler - [" + workingSourceCodeFile.getAbsolutePath() + "] - [" + workingSourceCodeFile.getName() + "]") : "QR Compiler");
                             }
                         });
                     } catch (IOException e) {
