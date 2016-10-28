@@ -3,20 +3,15 @@
  */
 
 import com.jfoenix.controls.*;
+import com.jfoenix.controls.events.JFXDialogEvent;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.geometry.Orientation;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.input.*;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -24,13 +19,14 @@ import javafx.scene.text.Text;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.mozilla.universalchardet.UniversalDetector;
-import org.w3c.dom.Document;
-import sun.plugin.javascript.ocx.JSObject;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.Random;
 
 
@@ -40,18 +36,12 @@ public class Controller {
     private BorderPane bpane;
     @FXML
     private StackPane root;
-
     @FXML
     private VBox editpane;
-
     @FXML
     private WebView editwebview;
-
-
     @FXML
     private JFXListView<Label> qrlistView;
-
-
     @FXML
     private ComboBox<String> comboBoxStyle;
     @FXML
@@ -62,63 +52,42 @@ public class Controller {
     private BorderPane editborderPane;
     @FXML
     private BorderPane QRPANEQ;
-
-
     @FXML
     private JFXTabPane tabpane;
 
+    private static File workingSourceCodeFile;
+    private static String workingSourceCodeFileEncoding;
     private JFXSnackbar snackbar;
     private String[] themes = new String[]{"xcode", "ambiance", "chaos", "chrome", "clouds", "clouds_midnight", "cobalt", "crimson_editor", "dawn", "dreamweaver", "clipse", "github", "idle_fingers", "iplastic", "katzenmilch", "kr_theme", "kuroir", "merbivore", "merbivore_soft", "mono_industrial", "monokai", "pastel_on_dark", "solarized_dark", "solarized_light", "sqlserver", "terminal", "textmate", "tomorrow", "tomorrow_night", "tomorrow_night_blue", "tomorrow_night_bright", "tomorrow_night_eighties", "twilight", "vibrant_ink"};
     private JFXSpinner spinner;
 
-    @FXML
-    void save(ActionEvent event) {
-        snackbar.show("저장되었습니다.", 2000);
-        final Clipboard clipboard = Clipboard.getSystemClipboard();
-        String content = (String) clipboard.getContent(DataFormat.PLAIN_TEXT);
-        content = StringEscapeUtils.escapeEcmaScript(content);
-        String query = "editor.insert('" + content + "');";
-        System.out.print(query);
-        editwebview.getEngine().executeScript(query);
-        if (!editwebview.isFocused()) {
-            editwebview.requestFocus();
-        }
-
-    }
-
-
-    @FXML
-    void about(ActionEvent event) {
-        JFXDialogLayout content = new JFXDialogLayout();
-        content.setHeading(new Text("QR컴파일러에 오신것을 환영합니다."));
-        ((Text) content.getHeading().get(0)).setFont(Font.font("Roboto", 17));
-        content.setBody(new Text("이 프로그램은 작성한 소스코드를 QR코드, 혹은 QR코드 묶음으로 변환하여 \n취급, 전달, 공유를 간편하게 만든게 특징입니다.\n\n또한, 서버에 저장하여 계정만 있다면 어디에나, 어느 컴퓨터, 어느 운영체제에서든\n사용이 가능하게하는 기능을 제공합니다.\n\nQR코드를 활용한 다양한 기능들을 사용해보세요!\n\nCreated By: 정승욱"));
-        ((Text) content.getBody().get(0)).setFont(Font.font("Roboto", 12));
-        final JFXDialog jfxDialog = new JFXDialog(root, content, JFXDialog.DialogTransition.CENTER);
-        JFXButton button = new JFXButton("확인");
-        button.setStyle("-fx-text-fill: #2196F3;");
-        button.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent event) {
-                jfxDialog.close();
-            }
-        });
-        content.setActions(button);
-        jfxDialog.show();
-    }
+    public static final int SAVE_CODE_STATUS_SUCCESS = 0;
+    public static final int SAVE_CODE_STATUS_CANCELED = 1;
+    public static final int SAVE_CODE_STATUS_FAILED = 2;
+    public static final int SAVE_MODE_ANOTHER = 3;
+    public static final int SAVE_MODE_OVERWRITE = 4;
+    private JFXDialog closeDialog;
+    private JFXDialog aboutDialog;
 
     @FXML
     void openSourceCode(ActionEvent event) {
         System.out.println("OPEN");
         FileChooser chooser = new FileChooser();
         chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("소스 코드", "*.c", "*.cpp", "*.java", "*.php", "*.asp", "*.html", "*.htm", "*.js", "*.css", "*.py", "*.sh", "*.rua", "*.jsp", "*.pl", "*.fs", "*.bas", "*.ss", "*.s", "*.swift", "*.cc", "*.pdml", "*.lss", "*.lsp", "*.cp", "*.phps", "*.txt"));
-        final File sourceCodeFile = chooser.showOpenDialog(null);
+        final File sourceCodeFile = chooser.showOpenDialog(editwebview.getParent().getScene().getWindow());
+        loadSourceCodeFile2(sourceCodeFile);
+    }
+
+    @Deprecated
+    private void loadSourceCodeFile(final File sourceCodeFile) {
         if (sourceCodeFile != null && eraseSourceCode()) {
+            workingSourceCodeFile = sourceCodeFile;
             editborderPane.centerProperty().set(spinner);
             new Thread(new Runnable() {
                 public void run() {
                     try {
                         byte[] buf = new byte[4096];
-                        java.io.FileInputStream fis = new java.io.FileInputStream(sourceCodeFile);
+                        FileInputStream fis = new FileInputStream(sourceCodeFile);
                         UniversalDetector detector = new UniversalDetector(null);
                         int nread;
                         while ((nread = fis.read(buf)) > 0 && !detector.isDone()) {
@@ -135,11 +104,6 @@ public class Controller {
                         if (encoding != null) {
                             bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(sourceCodeFile), encoding));
                         } else {
-                            Platform.runLater(new Runnable() {
-                                public void run() {
-                                    snackbar.show("인코딩 타입을 감지하지 못하였습니다. 문자가 정상적으로 나오지 않을수 있습니다.", 2000);
-                                }
-                            });
                             bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(sourceCodeFile)));
                         }
                         final StringBuilder stringBuilder = new StringBuilder();
@@ -149,8 +113,7 @@ public class Controller {
                         }
                         detector.handleData(stringBuilder.toString().getBytes(), 0, stringBuilder.toString().getBytes().length);
                         detector.dataEnd();
-                        System.out.println(detector.getDetectedCharset());
-
+                        System.out.println(FileUtils.readFileToString(sourceCodeFile, encoding));
                         Platform.runLater(new Runnable() {
                             public void run() {
                                 editwebview.getEngine().executeScript("editor.setValue('" + StringEscapeUtils.escapeEcmaScript(stringBuilder.toString()) + "')");
@@ -172,20 +135,92 @@ public class Controller {
                 }
             }).start();
         }
+    }
 
-
+    private void loadSourceCodeFile2(final File sourceCodeFile) {
+        if (sourceCodeFile != null && eraseSourceCode()) {
+            workingSourceCodeFile = sourceCodeFile;
+            editborderPane.centerProperty().set(spinner);
+            new Thread(new Runnable() {
+                public void run() {
+                    try {
+                        byte[] buf = new byte[4096];
+                        FileInputStream fis = new FileInputStream(sourceCodeFile);
+                        UniversalDetector detector = new UniversalDetector(null);
+                        int nread;
+                        while ((nread = fis.read(buf)) > 0 && !detector.isDone()) {
+                            detector.handleData(buf, 0, nread);
+                        }
+                        detector.dataEnd();
+                        workingSourceCodeFileEncoding = detector.getDetectedCharset();
+                        if (workingSourceCodeFileEncoding != null) {
+                            System.out.println("Detected Encoding = " + workingSourceCodeFileEncoding);
+                        } else {
+                            System.out.println("No Encoding detected.");
+                        }
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        final String value = FileUtils.readFileToString(workingSourceCodeFile, workingSourceCodeFileEncoding);
+                        Platform.runLater(new Runnable() {
+                            public void run() {
+                                editwebview.getEngine().executeScript("editor.setValue('" + StringEscapeUtils.escapeEcmaScript(value) + "')");
+                            }
+                        });
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } finally {
+                        Platform.runLater(new Runnable() {
+                            public void run() {
+                                editborderPane.centerProperty().set(editwebview);
+                            }
+                        });
+                    }
+                }
+            }).start();
+        }
     }
 
     @FXML
     void saveSource(ActionEvent event) {
-        snackbar.show("저장되었습니다.", 2000);
+        int respondCode = saveSourceCode(SAVE_MODE_OVERWRITE);
+        switch (respondCode) {
+            case SAVE_CODE_STATUS_SUCCESS:
+                snackbar.show("저장하였습니다.", 2000);
+                break;
+            case SAVE_CODE_STATUS_FAILED:
+                snackbar.show("저장하는데 실패하였습니다.", 2000);
+                break;
+            default:
+                break;
+        }
+    }
+
+    @FXML
+    void saveAnotherSource(ActionEvent event) {
+        int respondCode = saveSourceCode(SAVE_MODE_ANOTHER);
+        switch (respondCode) {
+            case SAVE_CODE_STATUS_SUCCESS:
+                snackbar.show("저장하였습니다.", 2000);
+                break;
+            case SAVE_CODE_STATUS_FAILED:
+                snackbar.show("저장하는데 실패하였습니다.", 2000);
+                break;
+            default:
+                break;
+        }
     }
 
     @FXML
         // This method is called by the FXMLLoader when initialization is complete
     void initialize() {
-        spinner = new JFXSpinner();
+        workingSourceCodeFile = null;
+        workingSourceCodeFileEncoding = null;
 
+        spinner = new JFXSpinner();
         snackbar = new JFXSnackbar(editpane);
         snackbar.setPrefWidth(300);
         snackbar.getStylesheets().add(getClass().getResource("snackbar_styles.css").toExternalForm());
@@ -218,8 +253,33 @@ public class Controller {
         }
     }
 
-    private void enableFirebug(final WebEngine engine) {
-        editwebview.getEngine().executeScript("if (!document.getElementById('FirebugLite')){E = document['createElement' + 'NS'] && document.documentElement.namespaceURI;E = E ? document['createElement' + 'NS'](E, 'script') : document['createElement']('script');E['setAttribute']('id', 'FirebugLite');E['setAttribute']('src', 'https://getfirebug.com/' + 'firebug-lite.js' + '#startOpened');E['setAttribute']('FirebugLite', '4');(document['getElementsByTagName']('head')[0] || document['getElementsByTagName']('body')[0]).appendChild(E);E = new Image;E['setAttribute']('src', 'https://getfirebug.com/' + '#startOpened');}");
+    private int saveSourceCode(int saveMode) {
+        try {
+            if (workingSourceCodeFile == null || saveMode == SAVE_MODE_ANOTHER) {
+                FileChooser fileChooser = new FileChooser();
+                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("소스 코드", "*.c", "*.cpp", "*.java", "*.php", "*.asp", "*.html", "*.htm", "*.js", "*.css", "*.py", "*.sh", "*.rua", "*.jsp", "*.pl", "*.fs", "*.bas", "*.ss", "*.s", "*.swift", "*.cc", "*.pdml", "*.lss", "*.lsp", "*.cp", "*.phps", "*.txt"));
+                File tempFile = fileChooser.showSaveDialog(editwebview.getParent().getScene().getWindow());
+                if (tempFile == null) {
+                    return SAVE_CODE_STATUS_CANCELED;
+                }
+                workingSourceCodeFile = tempFile;
+                workingSourceCodeFileEncoding = null;
+                if (!workingSourceCodeFile.exists()) {
+                    workingSourceCodeFile.createNewFile();
+                }
+            }
+            System.out.println("Saved as:" + workingSourceCodeFileEncoding);
+            FileUtils.writeStringToFile(workingSourceCodeFile, getSourceCodeValueFromEditor(), false);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return SAVE_CODE_STATUS_FAILED;
+        }
+        return SAVE_CODE_STATUS_SUCCESS;
+    }
+
+    private String getSourceCodeValueFromEditor() {
+        String sourceCodeValue = (String) editwebview.getEngine().executeScript("editor.getValue()");
+        return sourceCodeValue;
     }
 
     private void setListenerEditWebView(final WebView editwebview) {
@@ -235,9 +295,21 @@ public class Controller {
                     String query = "editor.insert('" + content + "');";
                     editwebview.getEngine().executeScript(query);
                 }
+                if (event.getCode() == KeyCode.ESCAPE) {
+                    pressedEscape();
+                }
                 if (event.isControlDown() && event.getCode() == KeyCode.S) {
-                    //TODO 저장 기능
-                    snackbar.show("저장되었습니다.", 2000);
+                    int respondCode = saveSourceCode(SAVE_MODE_OVERWRITE);
+                    switch (respondCode) {
+                        case SAVE_CODE_STATUS_SUCCESS:
+                            snackbar.show("저장하였습니다.", 2000);
+                            break;
+                        case SAVE_CODE_STATUS_FAILED:
+                            snackbar.show("저장하는데 실패하였습니다.", 2000);
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
         });
@@ -310,7 +382,154 @@ public class Controller {
     }
 
     private boolean eraseSourceCode() {
-        editwebview.getEngine().executeScript("editor.setValue('');  editor.getSession().setUndoManager(new ace.UndoManager());");
+        try {
+            editwebview.getEngine().executeScript("editor.setValue('');  editor.getSession().setUndoManager(new ace.UndoManager());");
+        } catch (Exception e) {
+            return false;
+        }
         return true;
+    }
+
+    private void enableFirebug(final WebEngine engine) {
+        editwebview.getEngine().executeScript("if (!document.getElementById('FirebugLite')){E = document['createElement' + 'NS'] && document.documentElement.namespaceURI;E = E ? document['createElement' + 'NS'](E, 'script') : document['createElement']('script');E['setAttribute']('id', 'FirebugLite');E['setAttribute']('src', 'https://getfirebug.com/' + 'firebug-lite.js' + '#startOpened');E['setAttribute']('FirebugLite', '4');(document['getElementsByTagName']('head')[0] || document['getElementsByTagName']('body')[0]).appendChild(E);E = new Image;E['setAttribute']('src', 'https://getfirebug.com/' + '#startOpened');}");
+    }
+
+    @FXML
+    void save(ActionEvent event) {
+        snackbar.show("저장되었습니다.", 2000);
+        /*final Clipboard clipboard = Clipboard.getSystemClipboard();
+        String content = (String) clipboard.getContent(DataFormat.PLAIN_TEXT);
+        content = StringEscapeUtils.escapeEcmaScript(content);
+        String query = "editor.insert('" + content + "');";
+        System.out.print(query);
+        editwebview.getEngine().executeScript(query);
+        if (!editwebview.isFocused()) {
+            editwebview.requestFocus();
+        }*/
+    }
+
+    @FXML
+    void about(ActionEvent event) {
+        JFXDialogLayout content = new JFXDialogLayout();
+        content.setHeading(new Text("QR컴파일러에 오신것을 환영합니다."));
+        ((Text) content.getHeading().get(0)).setFont(Font.font("Roboto", 17));
+        content.setBody(new Text("이 프로그램은 작성한 소스코드를 QR코드, 혹은 QR코드 묶음으로 변환하여 \n취급, 전달, 공유를 간편하게 만든게 특징입니다.\n\n또한, 서버에 저장하여 계정만 있다면 어디에나, 어느 컴퓨터, 어느 운영체제에서든\n사용이 가능하게하는 기능을 제공합니다.\n\nQR코드를 활용한 다양한 기능들을 사용해보세요!\n\nCreated By: 정승욱"));
+        ((Text) content.getBody().get(0)).setFont(Font.font("Roboto", 12));
+        aboutDialog = new JFXDialog(root, content, JFXDialog.DialogTransition.CENTER);
+        JFXButton button = new JFXButton("확인");
+        button.setStyle("-fx-text-fill: #2196F3;");
+        button.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent event) {
+                aboutDialog.close();
+            }
+        });
+        content.setActions(button);
+        aboutDialog.show();
+        editwebview.requestFocus();
+    }
+
+    @FXML
+    void closeQRCompiler(ActionEvent event) {
+        try {
+            //noinspection Since15
+            if (!((workingSourceCodeFile == null && (getSourceCodeValueFromEditor() == null || getSourceCodeValueFromEditor().isEmpty() || getSourceCodeValueFromEditor().length() <= 0)) || (workingSourceCodeFile != null && FileUtils.readFileToString(workingSourceCodeFile, workingSourceCodeFileEncoding).equals(getSourceCodeValueFromEditor())))) {
+                JFXDialogLayout content = new JFXDialogLayout();
+                if (workingSourceCodeFile != null) {
+                    content.setHeading(new Text("'" + workingSourceCodeFile.getName() + "'에서 수정한 내용을 저장하겠습니까?"));
+                } else {
+                    content.setHeading(new Text("작성하신 내용을 저장하겠습니까?"));
+                }
+                ((Text) content.getHeading().get(0)).setFont(Font.font("Roboto", 17));
+                content.setBody(new Text("저장하지 않으면 수정사항이 사라집니다."));
+                ((Text) content.getBody().get(0)).setFont(Font.font("Roboto", 12));
+                if (closeDialog != null) {
+                    closeDialog.close();
+                }
+                closeDialog = new JFXDialog(root, content, JFXDialog.DialogTransition.CENTER);
+
+                JFXButton save = new JFXButton("저장");
+                save.setStyle("-fx-text-fill: #2196F3;");
+                save.setOnAction(new EventHandler<ActionEvent>() {
+                    public void handle(ActionEvent event) {
+                        int respondCode = saveSourceCode(SAVE_MODE_OVERWRITE);
+                        switch (respondCode) {
+                            case SAVE_CODE_STATUS_SUCCESS:
+                                System.exit(0);
+                                break;
+                            case SAVE_CODE_STATUS_FAILED:
+                                snackbar.show("저장하는데 실패하였습니다.", 2000);
+                                break;
+                            case SAVE_CODE_STATUS_CANCELED:
+                                break;
+                        }
+                    }
+                });
+
+                JFXButton dontsave = new JFXButton("저장하지 않기");
+                dontsave.setStyle("-fx-text-fill: #2196F3;");
+                dontsave.setOnAction(new EventHandler<ActionEvent>() {
+                    public void handle(ActionEvent event) {
+                        System.exit(0);
+                    }
+                });
+
+                JFXButton cancel = new JFXButton("취소");
+                cancel.setStyle("-fx-text-fill: #2196F3;");
+                cancel.setOnAction(new EventHandler<ActionEvent>() {
+                    public void handle(ActionEvent event) {
+                        closeDialog.close();
+                        editwebview.requestFocus();
+                    }
+                });
+
+                content.setActions(save, dontsave, cancel);
+                closeDialog.show();
+                editwebview.requestFocus();
+            } else {
+                JFXDialogLayout content = new JFXDialogLayout();
+                content.setHeading(new Text("정말로 닫으시겠습니까?"));
+                ((Text) content.getHeading().get(0)).setFont(Font.font("Roboto", 17));
+                content.setBody(new Text("  "));
+                ((Text) content.getBody().get(0)).setFont(Font.font("Roboto", 12));
+                if (closeDialog != null) {
+                    closeDialog.close();
+                }
+                closeDialog = new JFXDialog(root, content, JFXDialog.DialogTransition.CENTER);
+                JFXButton button = new JFXButton("확인");
+                button.setStyle("-fx-text-fill: #2196F3;");
+                button.setOnAction(new EventHandler<ActionEvent>() {
+                    public void handle(ActionEvent event) {
+                        System.exit(0);
+                    }
+                });
+
+                JFXButton cancel = new JFXButton("취소");
+                cancel.setStyle("-fx-text-fill: #2196F3;");
+                cancel.setOnAction(new EventHandler<ActionEvent>() {
+                    public void handle(ActionEvent event) {
+                        closeDialog.close();
+                        editwebview.requestFocus();
+                    }
+                });
+
+                content.setActions(button, cancel);
+
+                closeDialog.show();
+                editwebview.requestFocus();
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(0);
+        }
+    }
+
+    public void pressedEscape() {
+        if (closeDialog != null) {
+            closeDialog.close();
+        }
+        if (aboutDialog != null) {
+            aboutDialog.close();
+        }
     }
 }

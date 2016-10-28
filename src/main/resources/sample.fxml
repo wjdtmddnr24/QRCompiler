@@ -85,13 +85,14 @@
                 <Menu mnemonicParsing="false" text="파일">
                   <items>
                     <MenuItem mnemonicParsing="false" onAction="#openSourceCode" text="코드 열기" />
-                        <MenuItem mnemonicParsing="false" text="QR코드 열기" />
                         <MenuItem mnemonicParsing="false" onAction="#saveSource" text="저장" />
-                        <MenuItem mnemonicParsing="false" text="닫기" />
+                        <MenuItem mnemonicParsing="false" onAction="#saveAnotherSource" text="다른 이름으로 저장" />
+                        <MenuItem mnemonicParsing="false" onAction="#closeQRCompiler" text="닫기" />
                   </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="QR코드">
                   <items>
+                        <MenuItem mnemonicParsing="false" text="QR코드 열기" />
                     <MenuItem mnemonicParsing="false" text="QR코드 생성" />
                   </items>
                 </Menu>
