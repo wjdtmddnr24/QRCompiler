@@ -49,6 +49,8 @@ public class Controller {
     @FXML
     private ComboBox<Label> comboBoxFont;
     @FXML
+    private ComboBox<String> comboBoxLanguage;
+    @FXML
     private BorderPane editborderPane;
     @FXML
     private BorderPane QRPANEQ;
@@ -59,6 +61,7 @@ public class Controller {
     private static String workingSourceCodeFileEncoding;
     private JFXSnackbar snackbar;
     private String[] themes = new String[]{"xcode", "ambiance", "chaos", "chrome", "clouds", "clouds_midnight", "cobalt", "crimson_editor", "dawn", "dreamweaver", "clipse", "github", "idle_fingers", "iplastic", "katzenmilch", "kr_theme", "kuroir", "merbivore", "merbivore_soft", "mono_industrial", "monokai", "pastel_on_dark", "solarized_dark", "solarized_light", "sqlserver", "terminal", "textmate", "tomorrow", "tomorrow_night", "tomorrow_night_blue", "tomorrow_night_bright", "tomorrow_night_eighties", "twilight", "vibrant_ink"};
+    private String[] languages = new String[]{"java", "c_cpp", "csharp", "python", "swift", "lua", "javascript", "html", "jsp", "php", "perl", "css", "xml", "django", "json", "assembly_x86", "fortran", "powershell", "groovy", "abap", "abc", "actionscript", "ada", "apache_conf", "applescript", "asciidoc", "autohotkey", "atchfile", "behaviour", "c9search", "cirru", "clojure", "cobol", "coffee", "coffee_worker", "coldfusion", "oldfusion_test", "css_completions", "css_test", "css_worker", "css_worker_test", "curly", "d", "dart", "diff", "dockerfile", "dot", "drools", "eiffel", "ejs", "elixir", "elm", "erlang", "forth", "ftl", "gcode", "gherkin", "gitignore", "glsl", "gobstones", "golang", "haml", "handlebars", "haskell", "haskell_cabal", "haxe", "html_completions", "html_elixir", "html_ruby", "html_test", "html_worker", "ini", "io", "jack", "jade", "json_worker", "json_worker_test", "jsoniq", "jsx", "julia", "kotlin", "latex", "less", "liquid", "lisp", "livescript", "logiql", "logiql_test", "lsl", "lua_worker", "luapage", "lucene", "makefile", "markdown", "mask", "matching_brace_outdent", "matching_parens_outdent", "matlab", "maze", "mel", "mushcode", "mysql", "nix", "nsis", "objectivec", "ocaml", "pascal", "pgsql", "php_completions", "php_test", "php_worker", "plain_text", "lain_text_test", "praat", "prolog", "properties", "protobuf", "python_test", "r", "razor", "razor_completions", "rdoc", "rhtml", "rst", "ruby", "ruby_test", "rust", "sass", "scad", "scala", "scheme", "scss", "sh", "sjs", "smarty", "snippets", "oy_template", "space", "sql", "sqlserver", "stylus", "svg", "tcl", "tex", "text", "text_test", "textile", "toml", "tsx", "twig", "typescript", "vala", "vbscript", "velocity", "verilog", "vhdl", "wollok", "xml_test", "xml_worker", "query", "xquery_worker", "yaml"};
     private JFXSpinner spinner;
 
     public static final int SAVE_CODE_STATUS_SUCCESS = 0;
@@ -246,6 +249,7 @@ public class Controller {
         setupcomboBoxStyle(comboBoxStyle);
         setupComboBoxSize(comboBoxSize);
         setupcomboBoxFont(comboBoxFont);
+        setupcomboBoxLanguage(comboBoxLanguage);
         setupQRCode();
 
     }
@@ -386,6 +390,21 @@ public class Controller {
                 editwebview.getEngine().executeScript("editor.setOptions({fontFamily: \"" + fontfamily + "\"});");
             }
         });
+    }
+
+    private void setupcomboBoxLanguage(final ComboBox<String> comboBoxLanguage) {
+        for (int i = 0; i < languages.length; i++) {
+            this.comboBoxLanguage.getItems().add(languages[i]);
+        }
+        comboBoxLanguage.setOnAction(new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent event) {
+                String program_language = comboBoxLanguage.getSelectionModel().getSelectedItem();
+                System.out.println("editor.getSession().setMode(\"ace/mode/" + program_language + "\");\n");
+                editwebview.getEngine().executeScript("editor.getSession().setMode(\"ace/mode/" + program_language + "\");\n");
+            }
+        });
+        comboBoxLanguage.getSelectionModel().selectFirst();
+
     }
 
     private boolean eraseSourceCode() {

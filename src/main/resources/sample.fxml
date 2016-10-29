@@ -14,97 +14,98 @@
 <?import javafx.scene.control.TextArea?>
 
 <StackPane fx:id="root" minHeight="450.0" minWidth="900.0" prefHeight="720.0" prefWidth="1280.0" stylesheets="snackbar_styles.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
-   <children>
-      <BorderPane>
-         <center>
-            <BorderPane BorderPane.alignment="CENTER">
-               <center>
-                  <JFXTabPane fx:id="tabpane" BorderPane.alignment="CENTER">
-                     <tabs>
-                        <Tab text="메인">
-                          <content>
-                              <VBox fx:id="editpane">
-                                 <children>
-                                    <SplitPane dividerPositions="0.7190923317683882" prefHeight="1581.0" prefWidth="1280.0">
-                                      <items>
-                                          <BorderPane fx:id="editborderPane" minWidth="600.0">
-                                             <center>
-                                                <WebView fx:id="editwebview" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
-                                             </center>
-                                             <top>
-                                                <HBox>
-                                                   <children>
-                                                      <GridPane alignment="CENTER_LEFT" hgap="13.0" minWidth="-Infinity" stylesheets="@material-fx-v0_3.css" BorderPane.alignment="CENTER_LEFT">
-                                                         <columnConstraints>
-                                                            <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="10.0" percentWidth="1.0" />
-                                                            <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="10.0" percentWidth="1.0" prefWidth="100.0" />
-                                                            <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="10.0" percentWidth="1.0" prefWidth="100.0" />
-                                                            <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="10.0" percentWidth="1.0" prefWidth="100.0" />
-                                                            <ColumnConstraints />
+    <children>
+        <BorderPane>
+            <center>
+                <BorderPane BorderPane.alignment="CENTER">
+                    <center>
+                        <JFXTabPane fx:id="tabpane" BorderPane.alignment="CENTER">
+                            <tabs>
+                                <Tab text="메인">
+                                    <content>
+                                        <VBox fx:id="editpane">
+                                            <children>
+                                                <SplitPane dividerPositions="0.7190923317683882" prefHeight="1581.0" prefWidth="1280.0">
+                                                    <items>
+                                                        <BorderPane fx:id="editborderPane" minWidth="600.0">
+                                                            <center>
+                                                                <WebView fx:id="editwebview" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+                                                            </center>
+                                                            <top>
+                                                                <HBox>
+                                                                    <children>
+                                                                        <GridPane alignment="CENTER_LEFT" hgap="13.0" minWidth="-Infinity" stylesheets="@material-fx-v0_3.css" BorderPane.alignment="CENTER_LEFT">
+                                                                            <columnConstraints>
+                                                                                <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="10.0" percentWidth="1.0" />
+                                                                                <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="10.0" percentWidth="1.0" prefWidth="100.0" />
+                                                                                <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="10.0" percentWidth="1.0" prefWidth="100.0" />
+                                                                                <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="10.0" percentWidth="1.0" prefWidth="100.0" />
+                                                                                <ColumnConstraints />
 
-                                                               </columnConstraints>
-                                                         <rowConstraints>
-                                                            <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                                                         </rowConstraints>
-                                                         <children>
-                                                            <ComboBox fx:id="comboBoxStyle" promptText="style" stylesheets="@material-fx-v0_3.css" />
-                                                            <ComboBox fx:id="comboBoxSize" promptText="size" visibleRowCount="12" GridPane.columnIndex="2" />
-                                                            <ComboBox fx:id="comboBoxFont" promptText="font" style="-fx-fill-text: #000000;" GridPane.columnIndex="1" />
-                                                            <JFXButton text="Compile" GridPane.columnIndex="4" />
-                                                         </children>
-                                                         <BorderPane.margin>
-                                                            <Insets bottom="3.0" left="10.0" right="3.0" top="3.0" />
-                                                         </BorderPane.margin>
-                                                      </GridPane>
-                                                   </children>
-                                                </HBox>
-                                             </top>
-                                          </BorderPane>
-                                          <BorderPane fx:id="QRPANEQ" maxWidth="350.0" minWidth="350.0" prefWidth="350.0" stylesheets="@snackbar_styles.css">
-                                             <center>
-                                                <JFXListView fx:id="qrlistView" BorderPane.alignment="CENTER">
-                                                   <effect>
-                                                      <Blend />
-                                                   </effect>
-                                                </JFXListView>
-                                             </center></BorderPane>
-                                      </items>
-                                    </SplitPane>
-                                 </children>
-                              </VBox>
-                          </content>
-                        </Tab>
-                        <Tab text="서버" />
-                     </tabs></JFXTabPane>
-               </center>
-            </BorderPane>
-         </center>
-         <top>
-            <MenuBar BorderPane.alignment="CENTER">
-              <menus>
-                <Menu mnemonicParsing="false" text="파일">
-                  <items>
-                    <MenuItem mnemonicParsing="false" onAction="#openSourceCode" text="코드 열기" />
-                        <MenuItem mnemonicParsing="false" onAction="#saveSource" text="저장" />
-                        <MenuItem mnemonicParsing="false" onAction="#saveAnotherSource" text="다른 이름으로 저장" />
-                        <MenuItem mnemonicParsing="false" onAction="#closeQRCompiler" text="닫기" />
-                  </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="QR코드">
-                  <items>
-                        <MenuItem mnemonicParsing="false" text="QR코드 열기" />
-                    <MenuItem mnemonicParsing="false" text="QR코드 생성" />
-                  </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="도움말">
-                  <items>
-                    <MenuItem mnemonicParsing="false" onAction="#about" text="About" />
-                        <MenuItem mnemonicParsing="false" text="HI" />
-                  </items>
-                </Menu>
-              </menus>
-            </MenuBar>
-         </top>
-      </BorderPane>
-   </children>
+                                                                            </columnConstraints>
+                                                                            <rowConstraints>
+                                                                                <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                                                                            </rowConstraints>
+                                                                            <children>
+                                                                                <ComboBox fx:id="comboBoxStyle" promptText="style" stylesheets="@material-fx-v0_3.css" />
+                                                                                <ComboBox fx:id="comboBoxSize" promptText="size" visibleRowCount="12" GridPane.columnIndex="2" />
+                                                                                <ComboBox fx:id="comboBoxFont" promptText="font" style="-fx-fill-text: #000000;" GridPane.columnIndex="1" />
+                                                                                <JFXButton text="Compile" GridPane.columnIndex="4" />
+                                                                                <ComboBox fx:id="comboBoxLanguage" prefWidth="150.0" promptText="program language" GridPane.columnIndex="3" />
+                                                                            </children>
+                                                                            <BorderPane.margin>
+                                                                                <Insets bottom="3.0" left="10.0" right="3.0" top="3.0" />
+                                                                            </BorderPane.margin>
+                                                                        </GridPane>
+                                                                    </children>
+                                                                </HBox>
+                                                            </top>
+                                                        </BorderPane>
+                                                        <BorderPane fx:id="QRPANEQ" maxWidth="350.0" minWidth="350.0" prefWidth="350.0" stylesheets="@snackbar_styles.css">
+                                                            <center>
+                                                                <JFXListView fx:id="qrlistView" BorderPane.alignment="CENTER">
+                                                                    <effect>
+                                                                        <Blend />
+                                                                    </effect>
+                                                                </JFXListView>
+                                                            </center></BorderPane>
+                                                    </items>
+                                                </SplitPane>
+                                            </children>
+                                        </VBox>
+                                    </content>
+                                </Tab>
+                                <Tab text="서버" />
+                            </tabs></JFXTabPane>
+                    </center>
+                </BorderPane>
+            </center>
+            <top>
+                <MenuBar BorderPane.alignment="CENTER">
+                    <menus>
+                        <Menu mnemonicParsing="false" text="파일">
+                            <items>
+                                <MenuItem mnemonicParsing="false" onAction="#openSourceCode" text="코드 열기" />
+                                <MenuItem mnemonicParsing="false" onAction="#saveSource" text="저장" />
+                                <MenuItem mnemonicParsing="false" onAction="#saveAnotherSource" text="다른 이름으로 저장" />
+                                <MenuItem mnemonicParsing="false" onAction="#closeQRCompiler" text="닫기" />
+                            </items>
+                        </Menu>
+                        <Menu mnemonicParsing="false" text="QR코드">
+                            <items>
+                                <MenuItem mnemonicParsing="false" text="QR코드 열기" />
+                                <MenuItem mnemonicParsing="false" text="QR코드 생성" />
+                            </items>
+                        </Menu>
+                        <Menu mnemonicParsing="false" text="도움말">
+                            <items>
+                                <MenuItem mnemonicParsing="false" onAction="#about" text="About" />
+                                <MenuItem mnemonicParsing="false" text="HI" />
+                            </items>
+                        </Menu>
+                    </menus>
+                </MenuBar>
+            </top>
+        </BorderPane>
+    </children>
 </StackPane>
