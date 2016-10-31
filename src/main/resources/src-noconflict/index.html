@@ -12,6 +12,7 @@
     }
 
 
+
     </style>
 </head>
 <body>
@@ -23,12 +24,23 @@
 </div>
 
 <script src="ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="ext-language_tools.js"></script>
 <script>
+    ace.require("ace/ext/language_tools");
     var editor = ace.edit("editor");
     editor.setTheme("ace/theme/xcode");
     editor.getSession().setMode("ace/mode/java");
     editor.setScrollSpeed(0.05);
+    editor.setOptions({
+        enableBasicAutocompletion: true,
+        enableSnippets: true,
+        enableLiveAutocompletion: false
+    });
+
+
     document.getElementById('editor').style.fontSize='16px';
+    var snippetManager = ace.require("ace/snippets").snippetManager;
+    snippetManager.insertSnippet(editor, snippet);
 
 
 </script>

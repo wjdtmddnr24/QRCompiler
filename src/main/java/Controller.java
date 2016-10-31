@@ -3,11 +3,12 @@
  */
 
 import com.jfoenix.controls.*;
-import com.jfoenix.controls.events.JFXDialogEvent;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.input.*;
@@ -20,18 +21,26 @@ import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.mozilla.universalchardet.UniversalDetector;
+import org.w3c.dom.Document;
 
 import java.io.*;
+import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Random;
 
 
 public class Controller {
 
+    @FXML
+    private StackPane editStackPane;
     @FXML
     private BorderPane bpane;
     @FXML
@@ -69,14 +78,47 @@ public class Controller {
     public static final int SAVE_CODE_STATUS_FAILED = 2;
     public static final int SAVE_MODE_ANOTHER = 3;
     public static final int SAVE_MODE_OVERWRITE = 4;
+    private static int compile_used_language = 0;
     private JFXDialog closeDialog;
     private JFXDialog aboutDialog;
+    private List<Pair<String, Integer>> availableLanguages;
+    private JFXDialog compileDialog;
 
     public void setStage(Stage stage) {
         this.stage = stage;
     }
 
     private Stage stage;
+
+    @FXML
+        // This method is called by the FXMLLoader when initialization is complete
+    void initialize() {
+        availableLanguages = null;
+        workingSourceCodeFile = null;
+        workingSourceCodeFileEncoding = null;
+        spinner = new JFXSpinner();
+        snackbar = new JFXSnackbar(editpane);
+        snackbar.setPrefWidth(300);
+        snackbar.getStylesheets().add(getClass().getResource("snackbar_styles.css").toExternalForm());
+        snackbar.setId("snackbar");
+        snackbar.setStyle("-fx-text-fill: #FFFFFF;");
+        editwebview.getEngine().setJavaScriptEnabled(true);
+        editwebview.getEngine().load(getClass().getResource("src-noconflict/index.html").toExternalForm());
+     /*   editwebview.getEngine().documentProperty().addListener(new ChangeListener<Document>() {
+            public void changed(ObservableValue<? extends Document> prop, Document oldDoc, Document newDoc) {
+                enableFirebug(editwebview.getEngine());
+            }
+        });
+*/
+
+        setListenerEditWebView(editwebview);
+        setupcomboBoxStyle(comboBoxStyle);
+        setupComboBoxSize(comboBoxSize);
+        setupcomboBoxFont(comboBoxFont);
+        setupcomboBoxLanguage(comboBoxLanguage);
+        setupQRCode();
+
+    }
 
     @FXML
     void openSourceCode(ActionEvent event) {
@@ -225,40 +267,61 @@ public class Controller {
     }
 
     @FXML
-        // This method is called by the FXMLLoader when initialization is complete
-    void initialize() {
-        workingSourceCodeFile = null;
-        workingSourceCodeFileEncoding = null;
+    void compileSource(ActionEvent event) {
+        String sourceCodeContent = getSourceCodeValueFromEditor();
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    final JFXSpinner[] cspinner = new JFXSpinner[1];
+                    Platform.runLater(new Runnable() {
+                        public void run() {
+                            cspinner[0] = new JFXSpinner();
+                            editStackPane.getChildren().add(cspinner[0]);
+                            editborderPane.setDisable(true);
+                        }
+                    });
+                    if (availableLanguages == null) {
+                        System.out.println("start");
+                        availableLanguages = QRHttpUtils.getAvailableLanguages();
+                        System.out.println("end");
+                    }
+                    Platform.runLater(new Runnable() {
+                        public void run() {
+                            editStackPane.getChildren().remove(cspinner[0]);
+                            editborderPane.setDisable(false);
+                            JFXDialog dialog = getCompileDialog();
+                            if (dialog != null) {
+                                dialog.show();
+                            }
+                        }
+                    });
 
-        spinner = new JFXSpinner();
-        snackbar = new JFXSnackbar(editpane);
-        snackbar.setPrefWidth(300);
-        snackbar.getStylesheets().add(getClass().getResource("snackbar_styles.css").toExternalForm());
-        snackbar.setId("snackbar");
-        snackbar.setStyle("-fx-text-fill: #FFFFFF;");
-        editwebview.getEngine().setJavaScriptEnabled(true);
-        editwebview.getEngine().load(getClass().getResource("src-noconflict/index.html").toExternalForm());
-       /* editwebview.getEngine().documentProperty().addListener(new ChangeListener<Document>() {
-            public void changed(ObservableValue<? extends Document> prop, Document oldDoc, Document newDoc) {
-                enableFirebug(editwebview.getEngine());
+                } catch (URISyntaxException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                } finally {
+                    Platform.runLater(new Runnable() {
+                        public void run() {
+                            if (editborderPane.isDisabled()) {
+                                editborderPane.setDisable(false);
+                            }
+                        }
+                    });
+                }
             }
-        });
-*/
-
-        setListenerEditWebView(editwebview);
-        setupcomboBoxStyle(comboBoxStyle);
-        setupComboBoxSize(comboBoxSize);
-        setupcomboBoxFont(comboBoxFont);
-        setupcomboBoxLanguage(comboBoxLanguage);
-        setupQRCode();
+        }).start();
 
     }
 
+
     private void setupQRCode() {
         Random r = new Random();
-        for (int i = 0; i < 10; i++) {
-            Label lbl = new Label();
-            lbl.setPrefSize(300, 300);
+        for (int i = 0; i < 2; i++) {
+            Label lbl = new Label("item" + String.valueOf(i));
+//            lbl.setPrefSize(300, 300);
             lbl.setStyle("-fx-background-color:rgb(" + r.nextInt(255) + "," + r.nextInt(255) + "," + r.nextInt(255) + ");");
             qrlistView.getItems().add(lbl);
         }
@@ -291,6 +354,82 @@ public class Controller {
     private String getSourceCodeValueFromEditor() {
         String sourceCodeValue = (String) editwebview.getEngine().executeScript("editor.getValue()");
         return sourceCodeValue;
+    }
+
+    private JFXDialog getCompileDialog() {
+        try {
+            JFXDialogLayout content = new JFXDialogLayout();
+            content.setHeading(new Text("컴파일하기"));
+            ((Text) content.getHeading().get(0)).setFont(Font.font("Roboto", 17));
+
+            Node body = new FXMLLoader(getClass().getResource("compileDialog.fxml")).load();
+            content.setBody(body);
+
+            compileDialog = new JFXDialog(root, content, JFXDialog.DialogTransition.CENTER);
+
+            final JFXTextArea compileInput = (JFXTextArea) body.lookup("#compileDialogInput");
+            final ComboBox<String> compileSyntax = (ComboBox<String>) body.lookup("#compileDialogSyntax");
+            for (Pair<String, Integer> p : availableLanguages) {
+                compileSyntax.getItems().add(p.getLeft());
+            }
+            compileSyntax.setOnAction(new EventHandler<ActionEvent>() {
+                public void handle(ActionEvent event) {
+                    compile_used_language = compileSyntax.getSelectionModel().getSelectedIndex();
+                }
+            });
+
+            compileSyntax.getSelectionModel().select(compile_used_language);
+
+
+            JFXButton ok = (JFXButton) body.lookup("#compileDialogCompile");
+            ok.setOnAction(new EventHandler<ActionEvent>() {
+                public void handle(ActionEvent event) {
+                    System.out.println("compile");
+                    String sourceCodeContent = getSourceCodeValueFromEditor();
+                    int compileLanguageCode = availableLanguages.get(compile_used_language).getRight();
+                    String compileInputContent = compileInput.getText();
+                    compileInputContent = (compileInputContent == null || compileInputContent.isEmpty()) ? "" : compileInputContent;
+                    String submissionQuery = QRHttpUtils.createSubmissionQuery(sourceCodeContent, compileLanguageCode, compileInputContent);
+                    System.out.println(submissionQuery);
+                    try {
+                        String respondId = QRHttpUtils.postSubmissionQuery(submissionQuery);
+                        JSONObject object = (JSONObject) new JSONParser().parse(respondId);
+                        System.out.println(object.get("id"));
+                        String result;
+                        while (true) {
+                            result = QRHttpUtils.getSubmissionResult(object.get("id").toString());
+                            if (QRHttpUtils.isExecuteDone(result)) {
+                                break;
+                            }
+                            Thread.sleep(100);
+
+                        }
+
+                        System.out.println(result);
+
+
+                    } catch (URISyntaxException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            JFXButton cancel = (JFXButton) body.lookup("#compileDialogCancel");
+            cancel.setOnAction(new EventHandler<ActionEvent>() {
+                public void handle(ActionEvent event) {
+                    compileDialog.close();
+                }
+            });
+            return compileDialog;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private void setListenerEditWebView(final WebView editwebview) {
@@ -394,16 +533,16 @@ public class Controller {
 
     private void setupcomboBoxLanguage(final ComboBox<String> comboBoxLanguage) {
         for (int i = 0; i < languages.length; i++) {
-            this.comboBoxLanguage.getItems().add(languages[i]);
+            this.comboBoxLanguage.getItems().add(languages[i].toUpperCase());
         }
         comboBoxLanguage.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
                 String program_language = comboBoxLanguage.getSelectionModel().getSelectedItem();
-                System.out.println("editor.getSession().setMode(\"ace/mode/" + program_language + "\");\n");
-                editwebview.getEngine().executeScript("editor.getSession().setMode(\"ace/mode/" + program_language + "\");\n");
+                System.out.println("editor.getSession().setMode(\"ace/mode/" + program_language.toLowerCase() + "\");\n");
+                editwebview.getEngine().executeScript("editor.getSession().setMode(\"ace/mode/" + program_language.toLowerCase() + "\");\n");
             }
         });
-        comboBoxLanguage.getSelectionModel().selectFirst();
+//        comboBoxLanguage.getSelectionModel().selectFirst();
 
     }
 

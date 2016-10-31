@@ -33,14 +33,16 @@ public class Main extends Application {
                 if (event.getCode() == KeyCode.ESCAPE) {
                     System.out.println("esc");
                     ((Controller) fxmlLoader.getController()).pressedEscape();
-
                 }
             }
         });
+        ((Controller) fxmlLoader.getController()).setStage(primaryStage);
+
         primaryStage.setMinHeight(550);
         primaryStage.setMinWidth(950);
         primaryStage.setScene(scene);
         primaryStage.show();
+        //TODO Beautify,Snippets scroll problem
     }
 
 
