@@ -29,38 +29,110 @@
                                                     <items>
                                           <StackPane fx:id="editStackPane">
                                              <children>
-                                                              <BorderPane fx:id="editborderPane" minWidth="600.0">
-                                                                  <center>
-                                                                      <WebView fx:id="editwebview" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
-                                                                  </center>
-                                                                  <top>
-                                                                      <HBox>
-                                                                          <children>
-                                                            <BorderPane prefHeight="33.0" prefWidth="2974.0">
+                                                <SplitPane fx:id="compilerSplitPane" dividerPositions="0.75" orientation="VERTICAL" style="-fx-background-color: #E8E8E8;">
+                                                   <items>
+                                                                    <BorderPane fx:id="editborderPane" minHeight="300.0" minWidth="600.0">
+                                                                        <center>
+                                                                            <WebView fx:id="editwebview" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+                                                                        </center>
+                                                                        <top>
+                                                                            <HBox>
+                                                                                <children>
+                                                                  <BorderPane prefHeight="33.0" prefWidth="2974.0">
+                                                                     <center>
+                                                                        <HBox alignment="CENTER_LEFT" spacing="7.0" BorderPane.alignment="CENTER">
+                                                                           <children>
+                                                                                                  <ComboBox fx:id="comboBoxStyle" promptText="style" stylesheets="@material-fx-v0_3.css" />
+                                                                                                  <ComboBox fx:id="comboBoxFont" promptText="Monospaced" style="-fx-fill-text: #000000;" />
+                                                                                                  <ComboBox fx:id="comboBoxSize" promptText="size" visibleRowCount="12" />
+                                                                                                  <ComboBox fx:id="comboBoxLanguage" prefWidth="130.0" promptText="언어" />
+                                                                           </children>
+                                                                           <opaqueInsets>
+                                                                              <Insets />
+                                                                           </opaqueInsets>
+                                                                        </HBox>
+                                                                     </center>
+                                                                     <padding>
+                                                                        <Insets left="5.0" right="5.0" />
+                                                                     </padding>
+                                                                  </BorderPane>
+                                                                                </children>
+                                                                            </HBox>
+                                                                        </top>
+                                                                    </BorderPane>
+                                                      <AnchorPane fx:id="compilerPane">
+                                                         <children>
+                                                            <AnchorPane maxHeight="42.0" minHeight="42.0" prefHeight="42.0" prefWidth="920.0" style="-fx-background-color: #00BCD4;" AnchorPane.bottomAnchor="120.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                            <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                               <padding>
+                                                                  <Insets top="8.0" />
+                                                               </padding>
                                                                <center>
-                                                                  <HBox alignment="CENTER_LEFT" spacing="7.0" BorderPane.alignment="CENTER">
+                                                                  <AnchorPane BorderPane.alignment="CENTER">
                                                                      <children>
-                                                                                            <ComboBox fx:id="comboBoxStyle" promptText="style" stylesheets="@material-fx-v0_3.css" />
-                                                                                            <ComboBox fx:id="comboBoxFont" promptText="Monospaced" style="-fx-fill-text: #000000;" />
-                                                                                            <ComboBox fx:id="comboBoxSize" promptText="size" visibleRowCount="12" />
-                                                                                            <ComboBox fx:id="comboBoxLanguage" prefWidth="130.0" promptText="언어" />
+                                                                        <GridPane prefWidth="920.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                                          <columnConstraints>
+                                                                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                                                          </columnConstraints>
+                                                                          <rowConstraints>
+                                                                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                                          </rowConstraints>
+                                                                           <children>
+                                                                              <JFXTabPane style="-fx-background-color: #FFFFFF;">
+                                                                                 <tabs>
+                                                                                    <Tab style="sdf: 30;" text="Input">
+                                                                                       <content>
+                                                                                          <AnchorPane>
+                                                                                             <children>
+                                                                                                <JFXTextArea fx:id="consoleInput" focusColor="#405aa800" promptText="Input을 입력하실 수 있습니다." wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                                                             </children>
+                                                                                          </AnchorPane>
+                                                                                       </content>
+                                                                                    </Tab>
+                                                                                 </tabs>
+                                                                              </JFXTabPane>
+                                                                              <StackPane fx:id="consoleBar" GridPane.columnIndex="1">
+                                                                                 <children>
+                                                                                    <JFXTabPane style="-fx-background-color: #F4F4F4;" GridPane.columnIndex="1">
+                                                                                       <tabs>
+                                                                                          <Tab text="Output">
+                                                                                            <content>
+                                                                                              <AnchorPane>
+                                                                                                   <children>
+                                                                                                      <TextArea fx:id="consoleOutput" editable="false" promptText="이곳에 Output이 출력됩니다." wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                                                                   </children>
+                                                                                                </AnchorPane>
+                                                                                            </content>
+                                                                                          </Tab>
+                                                                                       </tabs>
+                                                                                    </JFXTabPane>
+                                                                                 </children>
+                                                                              </StackPane>
+                                                                           </children>
+                                                                        </GridPane>
+                                                                     </children>
+                                                                  </AnchorPane>
+                                                               </center>
+                                                            </BorderPane>
+                                                            <BorderPane AnchorPane.rightAnchor="0.0">
+                                                               <right>
+                                                                  <HBox alignment="CENTER_RIGHT" nodeOrientation="LEFT_TO_RIGHT" pickOnBounds="false" spacing="10.0" BorderPane.alignment="CENTER">
+                                                                     <children>
+                                                                        <Label text="Language:" />
+                                                                        <ComboBox fx:id="compileSyntax" maxHeight="37.0" minHeight="37.0" prefHeight="37.0" prefWidth="150.0" visibleRowCount="4" />
+                                                                                            <JFXButton fx:id="compileButton" layoutX="1.0" layoutY="1.0" onAction="#compileSource" ripplerFill="WHITE" style="-fx-background-color: #2196F3;" text="Compile" textFill="WHITE" BorderPane.alignment="CENTER" />
                                                                      </children>
                                                                      <opaqueInsets>
-                                                                        <Insets />
+                                                                        <Insets right="10.0" />
                                                                      </opaqueInsets>
                                                                   </HBox>
-                                                               </center>
-                                                               <padding>
-                                                                  <Insets left="5.0" right="5.0" />
-                                                               </padding>
-                                                               <right>
-                                                                                      <JFXButton fx:id="compileButton" onAction="#compileSource" ripplerFill="WHITE" style="-fx-background-color: #2196F3;" text="Compile" textFill="WHITE" BorderPane.alignment="CENTER" />
                                                                </right>
                                                             </BorderPane>
-                                                                          </children>
-                                                                      </HBox>
-                                                                  </top>
-                                                              </BorderPane>
+                                                         </children>
+                                                      </AnchorPane>
+                                                   </items>
+                                                </SplitPane>
                                              </children>
                                           </StackPane>
                                                         <BorderPane fx:id="QRPANEQ" maxWidth="350.0" minWidth="350.0" prefWidth="350.0" stylesheets="@snackbar_styles.css">

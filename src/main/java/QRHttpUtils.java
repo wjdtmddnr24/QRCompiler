@@ -109,4 +109,85 @@ public class QRHttpUtils {
             return false;
         }
     }
+
+    public static class SubmissionDetail {
+        private String error;
+        private String input;
+        private String output;
+        private String stderr;
+        private String cmpinfo;
+        private Double time;
+        private long signal;
+        private long result;
+        private long status;
+        private long memory;
+
+        public SubmissionDetail(String jsonResult) throws ParseException {
+            JSONParser parser = new JSONParser();
+            JSONObject root = (JSONObject) parser.parse(jsonResult);
+            status = (Long) root.get("status");
+            signal = (Long) root.get("signal");
+            error = (String) root.get("error");
+            input = (String) root.get("input");
+            output = (String) root.get("output");
+            stderr = (String) root.get("stderr");
+            cmpinfo = (String) root.get("cmpinfo");
+            time = Double.parseDouble(root.get("time").toString());
+            memory = (Long) root.get("memory");
+            result = (Long) root.get("result");
+        }
+
+        public String getOutputOrError() {
+            switch ((int) result) {
+                case 15:
+                    if (!cmpinfo.isEmpty()) {
+                        return cmpinfo;
+                    }
+                    return output;
+                case 11:
+                    return cmpinfo;
+            }
+            return "nothing";
+        }
+
+        public String getError() {
+            return error;
+        }
+
+        public String getInput() {
+            return input;
+        }
+
+        public String getOutput() {
+            return output;
+        }
+
+        public String getStderr() {
+            return stderr;
+        }
+
+        public String getCmpinfo() {
+            return cmpinfo;
+        }
+
+        public Double getTime() {
+            return time;
+        }
+
+        public long getSignal() {
+            return signal;
+        }
+
+        public long getResult() {
+            return result;
+        }
+
+        public long getStatus() {
+            return status;
+        }
+
+        public long getMemory() {
+            return memory;
+        }
+    }
 }
