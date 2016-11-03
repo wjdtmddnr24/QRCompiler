@@ -25,6 +25,9 @@
     <root id="root">
       <element id="archive" name="QRStudio.jar">
         <element id="module-output" name="QRCompiler" />
+        <element id="directory" name="META-INF">
+          <element id="artifact" artifact-name="MANIFEST_MF" />
+        </element>
       </element>
       <element id="module-output" name="QRCompiler_main" />
       <element id="library" level="project" name="Gradle: com.jfoenix:jfoenix:1.0.0" />

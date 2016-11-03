@@ -154,7 +154,6 @@
                                         </VBox>
                                     </content>
                                 </Tab>
-                                <Tab text="서버" />
                             </tabs></JFXTabPane>
                     </center>
                 </BorderPane>
