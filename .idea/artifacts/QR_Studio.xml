@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
-  <artifact type="javafx" name="QRCompiler">
-    <output-path>D:/QRCompiler</output-path>
+  <artifact type="javafx" name="QR Studio">
+    <output-path>D:/QRStudio</output-path>
     <properties id="javafx-properties">
       <options>
         <option name="appClass" value="Main" />
@@ -16,7 +16,7 @@
       </options>
     </properties>
     <root id="root">
-      <element id="archive" name="QRCompiler.jar">
+      <element id="archive" name="QRStudio.jar">
         <element id="module-output" name="QRCompiler" />
       </element>
       <element id="module-output" name="QRCompiler_main" />
@@ -34,6 +34,9 @@
       <element id="library" level="project" name="Gradle: org.apache.httpcomponents:httpclient:4.5.2" />
       <element id="library" level="project" name="Gradle: org.apache.httpcomponents:httpcore:4.4.5" />
       <element id="library" level="project" name="Gradle: org.hamcrest:hamcrest-core:1.1" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/core-3.3.0.jar" />
+      <element id="file-copy" path="$USER_HOME$/Downloads/javase-3.3.0.jar" />
+      <element id="library" level="project" name="Gradle: org.tukaani:xz:1.5" />
     </root>
   </artifact>
 </component>

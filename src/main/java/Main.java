@@ -19,7 +19,7 @@ public class Main extends Application {
         final FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("sample.fxml"));
 //        Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
         Parent root = fxmlLoader.load();
-        primaryStage.setTitle("QR Compiler");
+        primaryStage.setTitle("QR Studio 1.0");
         Scene scene = new Scene(root, 1280, 720);
         scene.getStylesheets().add(getClass().getResource("material-fx-v0_3.css").toExternalForm());
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.effect.*?>
 <?import javafx.scene.web.*?>
@@ -27,7 +29,7 @@
                                             <children>
                                                 <SplitPane dividerPositions="0.7190923317683882" prefHeight="1581.0" prefWidth="1280.0">
                                                     <items>
-                                          <StackPane fx:id="editStackPane">
+                                          <StackPane fx:id="editStackPane" minWidth="767.0">
                                              <children>
                                                 <SplitPane fx:id="compilerSplitPane" dividerPositions="0.75" orientation="VERTICAL" style="-fx-background-color: #E8E8E8;">
                                                    <items>
@@ -55,6 +57,9 @@
                                                                      <padding>
                                                                         <Insets left="5.0" right="5.0" />
                                                                      </padding>
+                                                                     <right>
+                                                                        <JFXButton buttonType="RAISED" onAction="#createQRCode" text="QR 생성" textFill="#2196f3" BorderPane.alignment="CENTER" />
+                                                                     </right>
                                                                   </BorderPane>
                                                                                 </children>
                                                                             </HBox>
@@ -135,7 +140,7 @@
                                                 </SplitPane>
                                              </children>
                                           </StackPane>
-                                                        <BorderPane fx:id="QRPANEQ" maxWidth="350.0" minWidth="350.0" prefWidth="350.0" stylesheets="@snackbar_styles.css">
+                                                        <BorderPane fx:id="QRPANEQ" maxWidth="440.0" minWidth="440.0" prefWidth="440.0" stylesheets="@snackbar_styles.css">
                                                             <center>
                                                                 <JFXListView fx:id="qrlistView" BorderPane.alignment="CENTER">
                                                                     <effect>
@@ -167,8 +172,8 @@
                         </Menu>
                         <Menu mnemonicParsing="false" text="QR코드">
                             <items>
-                                <MenuItem mnemonicParsing="false" text="QR코드 열기" />
-                                <MenuItem mnemonicParsing="false" text="QR코드 생성" />
+                                <MenuItem mnemonicParsing="false" onAction="#openQRCodeImage" text="QR코드 가져오기" />
+                                <MenuItem mnemonicParsing="false" onAction="#createQRCodeCurrent" text="현재 소스 QR코드 생성" />
                             </items>
                         </Menu>
                         <Menu mnemonicParsing="false" text="도움말">

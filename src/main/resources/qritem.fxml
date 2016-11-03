@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.image.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane mouseTransparent="true" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <JFXRippler>
+         <children>
+            <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="200.0" prefWidth="400.0">
+               <left>
+                  <ImageView fx:id="itemImageView" fitHeight="160.0" fitWidth="160.0" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER_LEFT">
+                     <BorderPane.margin>
+                        <Insets />
+                     </BorderPane.margin>
+                  </ImageView>
+               </left>
+               <padding>
+                  <Insets left="20.0" right="20.0" />
+               </padding>
+               <right>
+                  <VBox prefHeight="71.0" prefWidth="185.0" spacing="3.0" BorderPane.alignment="CENTER">
+                     <children>
+                        <Label fx:id="itemProjectName" maxWidth="185.0" minWidth="185.0" prefWidth="185.0" wrapText="true">
+                           <font>
+                              <Font size="20.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="itemDateTime" maxWidth="185.0" minWidth="185.0" prefWidth="185.0">
+                           <font>
+                              <Font size="13.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="itemContentThumbnail" maxWidth="185.0" minWidth="185.0" prefWidth="185.0" textFill="#00000085" wrapText="true">
+                           <font>
+                              <Font size="13.0" />
+                           </font>
+                        </Label>
+                        <JFXRippler />
+                     </children>
+                     <BorderPane.margin>
+                        <Insets bottom="30.0" top="30.0" />
+                     </BorderPane.margin>
+                  </VBox>
+               </right>
+            </BorderPane>
+         </children>
+      </JFXRippler>
+      <JFXPopup fx:id="itemPopup" />
+   </children>
+</AnchorPane>
