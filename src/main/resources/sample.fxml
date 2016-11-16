@@ -178,7 +178,6 @@
                         <Menu mnemonicParsing="false" text="도움말">
                             <items>
                                 <MenuItem mnemonicParsing="false" onAction="#about" text="About" />
-                                <MenuItem mnemonicParsing="false" text="HI" />
                             </items>
                         </Menu>
                     </menus>

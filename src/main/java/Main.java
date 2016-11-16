@@ -1,4 +1,3 @@
-import com.jfoenix.controls.JFXMasonryPane;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;

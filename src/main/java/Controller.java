@@ -807,7 +807,7 @@ public class Controller {
                     }
                     content = StringEscapeUtils.escapeEcmaScript(content);
                     String query = "editor.insert('" + content + "');";
-                    editwebview.getEngine().executeScript(query);
+//                    editwebview.getEngine().executeScript(query);
                 }
                 if (event.getCode() == KeyCode.ESCAPE) {
                     pressedEscape();
@@ -966,7 +966,7 @@ public class Controller {
         JFXDialogLayout content = new JFXDialogLayout();
         content.setHeading(new Text("QR Studio에 오신것을 환영합니다."));
         ((Text) content.getHeading().get(0)).setFont(Font.font("Roboto", 17));
-        content.setBody(new Text("이 프로그램은 작성한 소스코드를 QR코드, 혹은 QR코드 묶음으로 변환하여 \n취급, 전달, 공유를 간편하게 만든게 특징입니다.\n\n온라인 컴파일러를 사용하여 어디에나, 어느 컴퓨터, 어느 운영체제에서든\n컴파일 및 실행이 가능하게하는 기능을 제공합니다.\n\nQR코드를 활용한 새로운 시대의 에디터를 사용해보세요!\n\nCreated By: 정승욱"));
+        content.setBody(new Text("이 프로그램은 작성한 소스코드를 QR코드, 혹은 QR코드 묶음으로 변환하여 \n취급, 전달, 공유를 간편하게 만든게 특징입니다.\n\n온라인 컴파일러를 사용하여 어디에나, 어느 컴퓨터, 어느 운영체제에서든\n컴파일 및 실행이 가능하게하는 기능을 제공합니다.\n\nQR코드를 활용한 새로운 세대의 에디터를 사용해보세요!\n\nCreated By: 정승욱"));
         ((Text) content.getBody().get(0)).setFont(Font.font("Roboto", 12));
         aboutDialog = new JFXDialog(root, content, JFXDialog.DialogTransition.CENTER);
         JFXButton button = new JFXButton("확인");
