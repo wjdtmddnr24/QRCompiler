@@ -807,7 +807,8 @@ public class Controller {
                     }
                     content = StringEscapeUtils.escapeEcmaScript(content);
                     String query = "editor.insert('" + content + "');";
-//                    editwebview.getEngine().executeScript(query);
+//                    TODO 빌드할때는 이거 꼭 지우기
+                    editwebview.getEngine().executeScript(query);
                 }
                 if (event.getCode() == KeyCode.ESCAPE) {
                     pressedEscape();

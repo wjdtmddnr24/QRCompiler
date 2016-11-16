@@ -7,7 +7,7 @@
       <sourceFolder url="file://$MODULE_DIR$/../../src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../src/main/resources" type="java-resource" />
     </content>
-    <orderEntry type="jdk" jdkName="IntelliJ IDEA Community Edition IC-162.2228.15" jdkType="IDEA JDK" />
+    <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Gradle: com.jfoenix:jfoenix:1.0.0" level="project" />
     <orderEntry type="library" name="Gradle: org.apache.commons:commons-lang3:3.0" level="project" />
@@ -24,7 +24,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/Desktop/core-3.3.0.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../lib/core-3.3.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -33,7 +33,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/Desktop/javase-3.3.0.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../lib/javase-3.3.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
