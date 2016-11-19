@@ -65,8 +65,6 @@ public class Controller {
     private VBox editpane;
     @FXML
     private WebView editwebview;
-    /*    @FXML
-        private ListView<Pane> qrlistView;*/
     @FXML
     private JFXListView<Pane> qrlistView;
     @FXML
@@ -130,7 +128,6 @@ public class Controller {
     private Stage stage;
 
     @FXML
-        // This method is called by the FXMLLoader when initialization is complete
     void initialize() {
         availableLanguages = null;
         workingSourceCodeFile = null;
@@ -172,7 +169,6 @@ public class Controller {
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
-
         setListenerEditWebView(editwebview);
         setupcomboBoxStyle(comboBoxStyle);
         setupComboBoxSize(comboBoxSize);
@@ -289,7 +285,6 @@ public class Controller {
         final String compileInputContent = tempCompileInputContent;
         final JFXSpinner spinner = new JFXSpinner();
         final Label compileLabel = new Label("\n\n\n준비중...");
-
         consoleBar.getChildren().add(spinner);
         consoleBar.getChildren().add(compileLabel);
         consoleBar.setDisable(true);
@@ -510,9 +505,7 @@ public class Controller {
 
     @FXML
     void createQRCode(ActionEvent event) {
-
         final String content = getSourceCodeValueFromEditor();
-
         new Thread(new Runnable() {
             public void run() {
                 try {
@@ -614,7 +607,6 @@ public class Controller {
                                 } else {
                                     System.out.println("No Encoding detected.");
                                 }
-
                                 editwebview.getEngine().executeScript("editor.insert('" + StringEscapeUtils.escapeEcmaScript(FileUtils.readFileToString(file, encoding)) + "')");
                             } catch (IOException e) {
                                 e.printStackTrace();
@@ -636,7 +628,7 @@ public class Controller {
                     content = StringEscapeUtils.escapeEcmaScript(content);
                     String query = "editor.insert('" + content + "');";
 //                    TODO 빌드할때는 이거 꼭 지우기
-                    editwebview.getEngine().executeScript(query);
+//                    editwebview.getEngine().executeScript(query);
                 }
                 if (event.getCode() == KeyCode.ESCAPE) {
                     pressedEscape();
@@ -738,8 +730,6 @@ public class Controller {
                 editwebview.getEngine().executeScript("editor.getSession().setMode(\"ace/mode/" + program_language.toLowerCase() + "\");\n");
             }
         });
-//        comboBoxLanguage.getSelectionModel().selectFirst();
-
     }
 
     private void setupQRListView(final JFXListView<Pane> qrlistView) {
@@ -828,20 +818,6 @@ public class Controller {
     }
 
     @FXML
-    void save(ActionEvent event) {
-        snackbar.show("저장되었습니다.", 2000);
-        /*final Clipboard clipboard = Clipboard.getSystemClipboard();
-        String content = (String) clipboard.getContent(DataFormat.PLAIN_TEXT);
-        content = StringEscapeUtils.escapeEcmaScript(content);
-        String query = "editor.insert('" + content + "');";
-        System.out.print(query);
-        editwebview.getEngine().executeScript(query);
-        if (!editwebview.isFocused()) {
-            editwebview.requestFocus();
-        }*/
-    }
-
-    @FXML
     void about(ActionEvent event) {
         JFXDialogLayout content = new JFXDialogLayout();
         content.setHeading(new Text("QR Studio에 오신것을 환영합니다."));
@@ -891,7 +867,6 @@ public class Controller {
                     closeDialog.close();
                 }
                 closeDialog = new JFXDialog(root, content, JFXDialog.DialogTransition.CENTER);
-
                 JFXButton save = new JFXButton("저장");
                 save.setStyle("-fx-text-fill: #2196F3;");
                 save.setOnAction(new EventHandler<ActionEvent>() {
@@ -912,7 +887,6 @@ public class Controller {
                         }
                     }
                 });
-
                 JFXButton dontsave = new JFXButton("저장하지 않기");
                 dontsave.setStyle("-fx-text-fill: #2196F3;");
                 dontsave.setOnAction(new EventHandler<ActionEvent>() {
@@ -920,7 +894,6 @@ public class Controller {
                         System.exit(0);
                     }
                 });
-
                 JFXButton cancel = new JFXButton("취소");
                 cancel.setStyle("-fx-text-fill: #2196F3;");
                 cancel.setOnAction(new EventHandler<ActionEvent>() {
@@ -929,7 +902,6 @@ public class Controller {
                         editwebview.requestFocus();
                     }
                 });
-
                 content.setActions(save, dontsave, cancel);
                 closeDialog.show();
                 editwebview.requestFocus();
@@ -959,12 +931,9 @@ public class Controller {
                         editwebview.requestFocus();
                     }
                 });
-
                 content.setActions(button, cancel);
-
                 closeDialog.show();
                 editwebview.requestFocus();
-
             }
         } catch (IOException e) {
             e.printStackTrace();
