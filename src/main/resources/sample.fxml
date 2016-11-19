@@ -174,6 +174,7 @@
                             <items>
                                 <MenuItem mnemonicParsing="false" onAction="#openQRCodeImage" text="QR코드 가져오기" />
                                 <MenuItem mnemonicParsing="false" onAction="#createQRCodeCurrent" text="현재 소스 QR코드 생성" />
+                                <MenuItem mnemonicParsing="false" onAction="#setQRCodeSize" text="QR코드 사진 크기 바꾸기" />
                             </items>
                         </Menu>
                         <Menu mnemonicParsing="false" text="도움말">

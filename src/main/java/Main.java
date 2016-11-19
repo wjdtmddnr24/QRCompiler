@@ -36,7 +36,6 @@ public class Main extends Application {
             }
         });
         ((Controller) fxmlLoader.getController()).setStage(primaryStage);
-
         primaryStage.setMinHeight(550);
         primaryStage.setMinWidth(950);
         primaryStage.setScene(scene);

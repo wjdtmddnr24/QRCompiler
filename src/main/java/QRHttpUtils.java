@@ -67,7 +67,7 @@ public class QRHttpUtils {
         CloseableHttpClient httpClient = HttpClients.createDefault();
         URI uri = new URIBuilder().setScheme("http").setHost("cd865df4.compilers.sphere-engine.com").setPath("/api/v3/submissions").setParameter("access_token", "03a61ada9a5cb95161d67a49a1320133").build();
         HttpPost httpPost = new HttpPost(uri);
-        StringEntity entity = new StringEntity(submissionQuery,"UTF-8");
+        StringEntity entity = new StringEntity(submissionQuery, "UTF-8");
         httpPost.addHeader("content-type", "application/json");
         httpPost.setEntity(entity);
         CloseableHttpResponse response = httpClient.execute(httpPost);
@@ -83,6 +83,7 @@ public class QRHttpUtils {
         }
     }
 
+
     public static String getSubmissionResult(String id) throws URISyntaxException, IOException {
         CloseableHttpClient httpClient = HttpClients.createDefault();
         URI uri = new URIBuilder().setScheme("http").setHost("cd865df4.compilers.sphere-engine.com").setPath("/api/v3/submissions/" + id).setParameter("access_token", "03a61ada9a5cb95161d67a49a1320133").setParameter("withInput", "true").setParameter("withOutput", "true").setParameter("withStderr", "true").setParameter("withCmpinfo", "true").build();
@@ -91,7 +92,7 @@ public class QRHttpUtils {
         try {
             System.out.println(response.getStatusLine());
             HttpEntity entity = response.getEntity();
-            String content = EntityUtils.toString(entity,"UTF-8");
+            String content = EntityUtils.toString(entity, "UTF-8");
             EntityUtils.consume(entity);
             return content;
         } finally {
@@ -139,7 +140,7 @@ public class QRHttpUtils {
                     if (!cmpinfo.isEmpty()) {
                         return cmpinfo;
                     }
-                    return output;
+                    return output + "\n\n\n\n\n실행시간 : " + getTime() + "    메모리: " +getMemory();
                 case 11:
                     return cmpinfo;
             }
