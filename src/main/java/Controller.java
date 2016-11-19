@@ -355,7 +355,7 @@ public class Controller {
                         String decompressed = CompressUtils.decompressText(CompressUtils.removeMarker(decoded));
                         System.out.println(decompressed);
                         editwebview.getEngine().executeScript("editor.setValue('" + StringEscapeUtils.escapeEcmaScript(decompressed) + "')");
-                        qrlistView.getItems().add(0, getQRCodeListItem(decompressed, null, image));
+                        qrlistView.getItems().add(0, getQRCodeListItem(decompressed, image,tempFile.getName()));
                     } catch (NotFoundException e) {
                         e.printStackTrace();
                         snackbar.show("QR코드를 인식하지 못하였습니다. 더 선명한 사진을 이용하세요.", 2000);
@@ -393,7 +393,7 @@ public class Controller {
         }
     }
 
-    public Pane getQRCodeListItem(String content, String compressedText, Image image) {
+    public Pane getQRCodeListItem(String content, Image image,String filename) {
         try {
             final Pane itemRoot = new FXMLLoader(getClass().getResource("qritem.fxml")).load();
             ImageView imageView = (ImageView) itemRoot.lookup("#itemImageView");
@@ -401,12 +401,12 @@ public class Controller {
             Label dateTime = (Label) itemRoot.lookup("#itemDateTime");
             Label thumbnail = (Label) itemRoot.lookup("#itemContentThumbnail");
             //final JFXPopup popup = (JFXPopup) root.lookup("#itemPopup");
-            if (compressedText == null) {
-                imageView.setImage(image);
-            } else {
-                imageView.setImage(QRCodeUtils.EncodeToQRCode(compressedText, 500, 500));
+            imageView.setImage(image);
+            if(filename != null && !filename.isEmpty()) {
+                projectName.setText(filename);
+            }else {
+                projectName.setText(workingSourceCodeFile != null ? workingSourceCodeFile.getName() : "No Title");
             }
-            projectName.setText(workingSourceCodeFile != null ? workingSourceCodeFile.getName() : "No Title");
             dateTime.setText(workingSourceCodeFile != null ? new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(workingSourceCodeFile.lastModified()) : new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
             if (content.length() < 100) {
                 thumbnail.setText(content.isEmpty() ? "내용 없음" : content);
@@ -470,10 +470,11 @@ public class Controller {
                 try {
                     byte[] compressedByte = CompressUtils.compressText(content);
                     final String compressedText = CompressUtils.addMarker(compressedByte);
+                    final Image image = QRCodeUtils.EncodeToQRCode(compressedText, 500, 500);
                     Platform.runLater(new Runnable() {
                         public void run() {
                             if (compressedText.length() < 2900) {
-                                qrlistView.getItems().add(0, getQRCodeListItem(content, compressedText, null));
+                                qrlistView.getItems().add(0, getQRCodeListItem(content, image,null));
                             } else {
                                 snackbar.show("문자가 너무커 QR코드로 만들지 못하였습니다.", 2000);
                             }
@@ -764,7 +765,6 @@ public class Controller {
     @FXML
     void closeQRCompiler(ActionEvent event) {
         try {
-            //noinspection Since15
             if (!((workingSourceCodeFile == null && (getSourceCodeValueFromEditor() == null || getSourceCodeValueFromEditor().isEmpty() || getSourceCodeValueFromEditor().length() <= 0)) || (workingSourceCodeFile != null && FileUtils.readFileToString(workingSourceCodeFile, workingSourceCodeFileEncoding).equals(getSourceCodeValueFromEditor())))) {
                 JFXDialogLayout content = new JFXDialogLayout();
                 if (workingSourceCodeFile != null) {
