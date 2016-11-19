@@ -9,9 +9,9 @@ import java.io.*;
  */
 public class CompressUtils {
     public static byte[] compressText(String text) throws IOException {
-//        System.out.println(text.length() + "original : " + text);
+        System.out.println(text.length() + "osdsriginal : " + text);
         byte[] result = null;
-        byte[] compressTarget = text.getBytes("ISO-8859-1");
+        byte[] compressTarget = text.getBytes("UTF-8");
         LZMA2Options options = new LZMA2Options();
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         ByteArrayInputStream input = new ByteArrayInputStream(compressTarget);
@@ -46,7 +46,7 @@ public class CompressUtils {
             byteArrayBuffer.append(buf, 0, read);
         String asdf = sb.toString();
 //        System.out.println("decompressed? : " + new String(byteArrayBuffer.toByteArray(), "EUC-KR"));
-        return new String(byteArrayBuffer.toByteArray(), "ISO-8859-1");
+        return new String(byteArrayBuffer.toByteArray(), "UTF-8");
     }
 
     public static String addMarker(byte[] compressed) throws UnsupportedEncodingException {

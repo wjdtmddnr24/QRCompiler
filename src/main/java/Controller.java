@@ -2,6 +2,8 @@
  * Sample Skeleton for 'sample.fxml' Controller Class
  */
 
+import com.google.zxing.ChecksumException;
+import com.google.zxing.FormatException;
 import com.google.zxing.NotFoundException;
 import com.jfoenix.controls.*;
 import javafx.application.Platform;
@@ -458,7 +460,13 @@ public class Controller {
                                                         editwebview.getEngine().executeScript("editor.setValue('" + StringEscapeUtils.escapeEcmaScript(decompressed) + "')");
                                                     } catch (NotFoundException e) {
                                                         e.printStackTrace();
+                                                        snackbar.show("QR코드를 인식하지 못하였습니다. 더 선명한 사진을 이용하세요.", 2000);
                                                     } catch (IOException e) {
+                                                        e.printStackTrace();
+                                                    } catch (ChecksumException e) {
+                                                        e.printStackTrace();
+                                                    } catch (FormatException e) {
+                                                        snackbar.show("QR코드를 인식하지 못하였습니다. 더 선명한 사진을 이용하세요.", 2000);
                                                         e.printStackTrace();
                                                     }
                                                 }
@@ -515,7 +523,14 @@ public class Controller {
 
                                             } catch (NotFoundException e) {
                                                 e.printStackTrace();
+                                                snackbar.show("QR코드를 인식하지 못하였습니다. 더 선명한 사진을 이용하세요.", 2000);
                                             } catch (IOException e) {
+                                                e.printStackTrace();
+                                            } catch (ChecksumException e) {
+                                                e.printStackTrace();
+                                            } catch (FormatException e) {
+                                                snackbar.show("QR코드를 인식하지 못하였습니다. 더 선명한 사진을 이용하세요.", 2000);
+
                                                 e.printStackTrace();
                                             }
                                         }
@@ -529,7 +544,14 @@ public class Controller {
                         }
                     } catch (NotFoundException e) {
                         e.printStackTrace();
+                        snackbar.show("QR코드를 인식하지 못하였습니다. 더 선명한 사진을 이용하세요.", 2000);
                     } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (ChecksumException e) {
+                        e.printStackTrace();
+                    } catch (FormatException e) {
+                        snackbar.show("QR코드를 인식하지 못하였습니다. 더 선명한 사진을 이용하세요.", 2000);
+
                         e.printStackTrace();
                     }
                 }
@@ -548,9 +570,9 @@ public class Controller {
                 try {
                     byte[] compressedByte = CompressUtils.compressText(content);
                     final String compressedText = CompressUtils.addMarker(compressedByte);
-                    System.out.println("original: (" + content.length() + ")\n");
+                    System.out.println("original: (" + content + content.length() + ")\n");
                     System.out.println("compressed: (" + compressedText.length() + ")\n");
-                    System.out.println("decompressed: (" + CompressUtils.decompressText(CompressUtils.removeMarker(compressedText)).length() + ")\n");
+                    System.out.println("decompressed: (" + CompressUtils.decompressText(CompressUtils.removeMarker(compressedText)) + CompressUtils.decompressText(CompressUtils.removeMarker(compressedText)).length() + ")\n");
                     String decompressed = CompressUtils.decompressText(CompressUtils.removeMarker(compressedText));
 //                    System.out.println("DDDD" + decompressed);
                     Platform.runLater(new Runnable() {
@@ -592,7 +614,14 @@ public class Controller {
                                                                 editwebview.getEngine().executeScript("editor.setValue('" + StringEscapeUtils.escapeEcmaScript(decompressed) + "')");
                                                             } catch (NotFoundException e) {
                                                                 e.printStackTrace();
+                                                                snackbar.show("QR코드를 인식하지 못하였습니다. 더 선명한 사진을 이용하세요.", 2000);
                                                             } catch (IOException e) {
+                                                                e.printStackTrace();
+                                                            } catch (ChecksumException e) {
+                                                                e.printStackTrace();
+                                                            } catch (FormatException e) {
+                                                                snackbar.show("QR코드를 인식하지 못하였습니다. 더 선명한 사진을 이용하세요.", 2000);
+
                                                                 e.printStackTrace();
                                                             }
                                                         }
@@ -649,7 +678,16 @@ public class Controller {
 
                                                     } catch (NotFoundException e) {
                                                         e.printStackTrace();
+                                                        snackbar.show("QR코드를 인식하지 못하였습니다. 더 선명한 사진을 이용하세요.", 2000);
+
                                                     } catch (IOException e) {
+                                                        e.printStackTrace();
+                                                    } catch (ChecksumException e) {
+                                                        e.printStackTrace();
+                                                    } catch (FormatException e) {
+                                                        snackbar.show("QR코드를 인식하지 못하였습니다. 더 선명한 사진을 이용하세요.", 2000);
+
+
                                                         e.printStackTrace();
                                                     }
                                                 }
@@ -711,82 +749,82 @@ public class Controller {
         return sourceCodeValue;
     }
 
-   /* private JFXDialog getCompileDialog() {
-        try {
-            JFXDialogLayout content = new JFXDialogLayout();
-            content.setHeading(new Text("컴파일하기"));
-            ((Text) content.getHeading().get(0)).setFont(Font.font("Roboto", 17));
+    /* private JFXDialog getCompileDialog() {
+         try {
+             JFXDialogLayout content = new JFXDialogLayout();
+             content.setHeading(new Text("컴파일하기"));
+             ((Text) content.getHeading().get(0)).setFont(Font.font("Roboto", 17));
 
-            Node body = new FXMLLoader(getClass().getResource("compileDialog.fxml")).load();
-            content.setBody(body);
+             Node body = new FXMLLoader(getClass().getResource("compileDialog.fxml")).load();
+             content.setBody(body);
 
-            compileDialog = new JFXDialog(root, content, JFXDialog.DialogTransition.CENTER);
+             compileDialog = new JFXDialog(root, content, JFXDialog.DialogTransition.CENTER);
 
-            final JFXTextArea compileInput = (JFXTextArea) body.lookup("#compileDialogInput");
-            final ComboBox<String> compileSyntax = (ComboBox<String>) body.lookup("#compileDialogSyntax");
-            for (Pair<String, Integer> p : availableLanguages) {
-                compileSyntax.getItems().add(p.getLeft());
-            }
-            compileSyntax.setOnAction(new EventHandler<ActionEvent>() {
-                public void handle(ActionEvent event) {
-                    compile_used_language = compileSyntax.getSelectionModel().getSelectedIndex();
-                }
-            });
+             final JFXTextArea compileInput = (JFXTextArea) body.lookup("#compileDialogInput");
+             final ComboBox<String> compileSyntax = (ComboBox<String>) body.lookup("#compileDialogSyntax");
+             for (Pair<String, Integer> p : availableLanguages) {
+                 compileSyntax.getItems().add(p.getLeft());
+             }
+             compileSyntax.setOnAction(new EventHandler<ActionEvent>() {
+                 public void handle(ActionEvent event) {
+                     compile_used_language = compileSyntax.getSelectionModel().getSelectedIndex();
+                 }
+             });
 
-            compileSyntax.getSelectionModel().select(compile_used_language);
-
-
-            JFXButton ok = (JFXButton) body.lookup("#compileDialogCompile");
-            ok.setOnAction(new EventHandler<ActionEvent>() {
-                public void handle(ActionEvent event) {
-
-                    System.out.println("compile");
-                    String sourceCodeContent = getSourceCodeValueFromEditor();
-                    int compileLanguageCode = availableLanguages.get(compile_used_language).getRight();
-                    String compileInputContent = compileInput.getText();
-                    compileInputContent = (compileInputContent == null || compileInputContent.isEmpty()) ? "" : compileInputContent;
-                    String submissionQuery = QRHttpUtils.createSubmissionQuery(sourceCodeContent, compileLanguageCode, compileInputContent);
-                    System.out.println(submissionQuery);
-                    try {
-                        String respondId = QRHttpUtils.postSubmissionQuery(submissionQuery);
-                        JSONObject object = (JSONObject) new JSONParser().parse(respondId);
-                        System.out.println(object.get("id"));
-                        String result;
-                        while (true) {
-                            result = QRHttpUtils.getSubmissionResult(object.get("id").toString());
-                            if (QRHttpUtils.getProgessStatus(result)) {
-                                break;
-                            }
-                            Thread.sleep(100);
-                        }
-
-                        System.out.println(result);
+             compileSyntax.getSelectionModel().select(compile_used_language);
 
 
-                    } catch (URISyntaxException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-            JFXButton cancel = (JFXButton) body.lookup("#compileDialogCancel");
-            cancel.setOnAction(new EventHandler<ActionEvent>() {
-                public void handle(ActionEvent event) {
-                    compileDialog.close();
-                }
-            });
-            return compileDialog;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-*/
+             JFXButton ok = (JFXButton) body.lookup("#compileDialogCompile");
+             ok.setOnAction(new EventHandler<ActionEvent>() {
+                 public void handle(ActionEvent event) {
+
+                     System.out.println("compile");
+                     String sourceCodeContent = getSourceCodeValueFromEditor();
+                     int compileLanguageCode = availableLanguages.get(compile_used_language).getRight();
+                     String compileInputContent = compileInput.getText();
+                     compileInputContent = (compileInputContent == null || compileInputContent.isEmpty()) ? "" : compileInputContent;
+                     String submissionQuery = QRHttpUtils.createSubmissionQuery(sourceCodeContent, compileLanguageCode, compileInputContent);
+                     System.out.println(submissionQuery);
+                     try {
+                         String respondId = QRHttpUtils.postSubmissionQuery(submissionQuery);
+                         JSONObject object = (JSONObject) new JSONParser().parse(respondId);
+                         System.out.println(object.get("id"));
+                         String result;
+                         while (true) {
+                             result = QRHttpUtils.getSubmissionResult(object.get("id").toString());
+                             if (QRHttpUtils.getProgessStatus(result)) {
+                                 break;
+                             }
+                             Thread.sleep(100);
+                         }
+
+                         System.out.println(result);
+
+
+                     } catch (URISyntaxException e) {
+                         e.printStackTrace();
+                     } catch (IOException e) {
+                         e.printStackTrace();
+                     } catch (ParseException e) {
+                         e.printStackTrace();
+                     } catch (InterruptedException e) {
+                         e.printStackTrace();
+                     }
+                 }
+             });
+             JFXButton cancel = (JFXButton) body.lookup("#compileDialogCancel");
+             cancel.setOnAction(new EventHandler<ActionEvent>() {
+                 public void handle(ActionEvent event) {
+                     compileDialog.close();
+                 }
+             });
+             return compileDialog;
+         } catch (IOException e) {
+             e.printStackTrace();
+             return null;
+         }
+     }
+ */
     private void setListenerEditWebView(final WebView editwebview) {
         editwebview.setOnDragDropped(new EventHandler<DragEvent>() {
             public void handle(DragEvent event) {

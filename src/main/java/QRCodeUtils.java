@@ -2,6 +2,7 @@ import com.google.zxing.*;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.common.HybridBinarizer;
+import com.google.zxing.qrcode.QRCodeReader;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import javafx.embed.swing.SwingFXUtils;
@@ -25,7 +26,7 @@ public class QRCodeUtils {
         try {
             Hashtable<EncodeHintType, String> hints = new Hashtable<EncodeHintType, String>(2);
             hints.put(EncodeHintType.CHARACTER_SET, "ISO-8859-1");
-            BitMatrix result = new MultiFormatWriter().encode(input, BarcodeFormat.QR_CODE, width, height, hints);
+            BitMatrix result = new QRCodeWriter().encode(input, BarcodeFormat.QR_CODE, width, height, hints);
             BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
             for (int i = 0; i < result.getHeight(); i++) {
                 for (int j = 0; j < result.getWidth(); j++) {
@@ -40,12 +41,16 @@ public class QRCodeUtils {
         return null;
     }
 
-    public static String DecodeToImage(Image image) throws NotFoundException {
+    public static String DecodeToImage(Image image) throws NotFoundException, FormatException, ChecksumException {
         HashMap<DecodeHintType, String> hint = new HashMap<DecodeHintType, String>();
         hint.put(DecodeHintType.CHARACTER_SET, "ISO-8859-1");
+        hint.put(DecodeHintType.TRY_HARDER, String.valueOf(Boolean.TRUE));
+        hint.put(DecodeHintType.PURE_BARCODE, String.valueOf(Boolean.FALSE));
+
+        BufferedImage image2 = SwingFXUtils.fromFXImage(image, null);
         BinaryBitmap binaryBitmap = new BinaryBitmap(new HybridBinarizer(
-                new BufferedImageLuminanceSource(SwingFXUtils.fromFXImage(image, null))));
-        Result qrCodeResult = new MultiFormatReader().decode(binaryBitmap, hint);
+                new BufferedImageLuminanceSource(image2)));
+        Result qrCodeResult = new QRCodeReader().decode(binaryBitmap, hint);
         return qrCodeResult.getText();
     }
 }
