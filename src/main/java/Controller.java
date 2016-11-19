@@ -355,7 +355,8 @@ public class Controller {
                         String decompressed = CompressUtils.decompressText(CompressUtils.removeMarker(decoded));
                         System.out.println(decompressed);
                         editwebview.getEngine().executeScript("editor.setValue('" + StringEscapeUtils.escapeEcmaScript(decompressed) + "')");
-                        qrlistView.getItems().add(0, getQRCodeListItem(decompressed, image,tempFile.getName()));
+                        stage.setTitle("QR Studio 1.0 - [" + tempFile.getAbsolutePath() + "] - [" + tempFile.getName() + "]");
+                        qrlistView.getItems().add(0, getQRCodeListItem(decompressed, image, tempFile.getName(), tempFile.getAbsolutePath()));
                     } catch (NotFoundException e) {
                         e.printStackTrace();
                         snackbar.show("QR코드를 인식하지 못하였습니다. 더 선명한 사진을 이용하세요.", 2000);
@@ -393,19 +394,28 @@ public class Controller {
         }
     }
 
-    public Pane getQRCodeListItem(String content, Image image,String filename) {
+    public Pane getQRCodeListItem(String content, Image image, String filename, String absoluteFilePath) {
         try {
             final Pane itemRoot = new FXMLLoader(getClass().getResource("qritem.fxml")).load();
             ImageView imageView = (ImageView) itemRoot.lookup("#itemImageView");
+            VBox vBox = (VBox) itemRoot.lookup("#itemVBox");
             Label projectName = (Label) itemRoot.lookup("#itemProjectName");
             Label dateTime = (Label) itemRoot.lookup("#itemDateTime");
             Label thumbnail = (Label) itemRoot.lookup("#itemContentThumbnail");
+            Label filePath = (Label) itemRoot.lookup("#itemContentFilePath");
             //final JFXPopup popup = (JFXPopup) root.lookup("#itemPopup");
             imageView.setImage(image);
-            if(filename != null && !filename.isEmpty()) {
+            if (filename != null && !filename.isEmpty()) {
                 projectName.setText(filename);
-            }else {
-                projectName.setText(workingSourceCodeFile != null ? workingSourceCodeFile.getName() : "No Title");
+                filePath.setText(absoluteFilePath);
+            } else {
+                if (workingSourceCodeFile != null) {
+                    projectName.setText(workingSourceCodeFile.getName());
+                    filePath.setText(workingSourceCodeFile.getAbsolutePath());
+                }else{
+                    projectName.setText("No Title");
+                    vBox.getChildren().remove(filePath);
+                }
             }
             dateTime.setText(workingSourceCodeFile != null ? new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(workingSourceCodeFile.lastModified()) : new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
             if (content.length() < 100) {
@@ -474,7 +484,7 @@ public class Controller {
                     Platform.runLater(new Runnable() {
                         public void run() {
                             if (compressedText.length() < 2900) {
-                                qrlistView.getItems().add(0, getQRCodeListItem(content, image,null));
+                                qrlistView.getItems().add(0, getQRCodeListItem(content, image, null, null));
                             } else {
                                 snackbar.show("문자가 너무커 QR코드로 만들지 못하였습니다.", 2000);
                             }
