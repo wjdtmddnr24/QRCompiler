@@ -13,8 +13,6 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
-import javafx.geometry.Orientation;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -132,18 +130,15 @@ public class Controller {
         snackbar.setStyle("-fx-text-fill: #FFFFFF;");
         editwebview.getEngine().setJavaScriptEnabled(true);
         editwebview.getEngine().load(getClass().getResource("src-noconflict/index.html").toExternalForm());
-
-     /*   editwebview.getEngine().documentProperty().addListener(new ChangeListener<Document>() {
+         /*editwebview.getEngine().documentProperty().addListener(new ChangeListener<Document>() {
             public void changed(ObservableValue<? extends Document> prop, Document oldDoc, Document newDoc) {
                 enableFirebug(editwebview.getEngine());
             }
-        });
-*/
+        });*/
         try {
             if (InetAddress.getByName("176.119.35.132").isReachable(3000)) {
                 System.out.println("getting...");
                 availableLanguages = QRHttpUtils.getAvailableLanguages();
-
                 for (Pair<String, Integer> p : availableLanguages) {
                     compileSyntax.getItems().add(p.getLeft());
                 }
@@ -156,7 +151,6 @@ public class Controller {
             } else {
                 compilerSplitPane.getItems().remove(compilerPane);
             }
-
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ParseException e) {
@@ -171,7 +165,6 @@ public class Controller {
         setupcomboBoxFont(comboBoxFont);
         setupQRListView(qrlistView);
         setupcomboBoxLanguage(comboBoxLanguage);
-
     }
 
     @FXML
@@ -180,69 +173,10 @@ public class Controller {
         FileChooser chooser = new FileChooser();
         chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("소스 코드", "*.c", "*.cpp", "*.java", "*.php", "*.asp", "*.html", "*.htm", "*.js", "*.css", "*.py", "*.sh", "*.rua", "*.jsp", "*.pl", "*.fs", "*.bas", "*.ss", "*.s", "*.swift", "*.cc", "*.pdml", "*.lss", "*.lsp", "*.cp", "*.phps", "*.txt"));
         final File sourceCodeFile = chooser.showOpenDialog(editwebview.getParent().getScene().getWindow());
-        loadSourceCodeFile2(sourceCodeFile);
+        loadSourceCodeFile(sourceCodeFile);
     }
 
-    @Deprecated
     private void loadSourceCodeFile(final File sourceCodeFile) {
-        if (sourceCodeFile != null && eraseSourceCode()) {
-            workingSourceCodeFile = sourceCodeFile;
-            editborderPane.centerProperty().set(spinner);
-            new Thread(new Runnable() {
-                public void run() {
-                    try {
-                        byte[] buf = new byte[4096];
-                        FileInputStream fis = new FileInputStream(sourceCodeFile);
-                        UniversalDetector detector = new UniversalDetector(null);
-                        int nread;
-                        while ((nread = fis.read(buf)) > 0 && !detector.isDone()) {
-                            detector.handleData(buf, 0, nread);
-                        }
-                        detector.dataEnd();
-                        String encoding = detector.getDetectedCharset();
-                        if (encoding != null) {
-                            System.out.println("Detected encoding = " + encoding);
-                        } else {
-                            System.out.println("No encoding detected.");
-                        }
-                        BufferedReader bufferedReader;
-                        if (encoding != null) {
-                            bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(sourceCodeFile), encoding));
-                        } else {
-                            bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(sourceCodeFile)));
-                        }
-                        final StringBuilder stringBuilder = new StringBuilder();
-                        String tmp;
-                        while ((tmp = bufferedReader.readLine()) != null) {
-                            stringBuilder.append(tmp + "\n");
-                        }
-                        detector.handleData(stringBuilder.toString().getBytes(), 0, stringBuilder.toString().getBytes().length);
-                        detector.dataEnd();
-                        System.out.println(FileUtils.readFileToString(sourceCodeFile, encoding));
-                        Platform.runLater(new Runnable() {
-                            public void run() {
-                                editwebview.getEngine().executeScript("editor.setValue('" + StringEscapeUtils.escapeEcmaScript(stringBuilder.toString()) + "')");
-
-                            }
-                        });
-
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } finally {
-                        Platform.runLater(new Runnable() {
-                            public void run() {
-                                editborderPane.centerProperty().set(editwebview);
-                            }
-                        });
-                    }
-                }
-            }).start();
-        }
-    }
-
-    private void loadSourceCodeFile2(final File sourceCodeFile) {
         if (sourceCodeFile != null && eraseSourceCode()) {
             workingSourceCodeFile = sourceCodeFile;
             editborderPane.centerProperty().set(spinner);
@@ -333,8 +267,6 @@ public class Controller {
 
     @FXML
     void compileSource(ActionEvent event) {
-
-        System.out.println("compile");
         final String sourceCodeContent = getSourceCodeValueFromEditor();
         final int compileLanguageCode = availableLanguages.get(compile_used_language).getRight();
         String tempCompileInputContent = consoleInput.getText();
@@ -396,7 +328,6 @@ public class Controller {
                             compileButton.setDisable(false);
                         }
                     });
-
                 } catch (URISyntaxException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
@@ -424,124 +355,7 @@ public class Controller {
                         String decompressed = CompressUtils.decompressText(CompressUtils.removeMarker(decoded));
                         System.out.println(decompressed);
                         editwebview.getEngine().executeScript("editor.setValue('" + StringEscapeUtils.escapeEcmaScript(decompressed) + "')");
-                        try {
-                            final Pane root = new FXMLLoader(getClass().getResource("qritem.fxml")).load();
-                            ImageView imageView = (ImageView) root.lookup("#itemImageView");
-                            Label projectName = (Label) root.lookup("#itemProjectName");
-                            Label dateTime = (Label) root.lookup("#itemDateTime");
-                            Label thumbnail = (Label) root.lookup("#itemContentThumbnail");
-//                                    final JFXPopup popup = (JFXPopup) root.lookup("#itemPopup");
-                            imageView.setImage(image);
-                            projectName.setText(tempFile.getName());
-                            dateTime.setText(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(tempFile.lastModified()));
-                            if (decompressed.length() < 100) {
-                                thumbnail.setText(decompressed.isEmpty() ? "내용 없음" : decompressed);
-                            } else {
-                                thumbnail.setText(decompressed.substring(0, 100));
-                            }
-                            root.setOnMouseClicked(new EventHandler<MouseEvent>() {
-                                public void handle(MouseEvent event) {
-                                    if (event.isPopupTrigger()) {
-                                        final JFXPopup popup = new JFXPopup();
-                                        VBox vBox = new VBox();
-                                        vBox.setStyle("-fx-background-color:#FFFFFF");
-                                        JFXButton open = new JFXButton("  화면에 열기  ");
-                                        open.setOnAction(new EventHandler<ActionEvent>() {
-                                            public void handle(ActionEvent event) {
-                                                eraseSourceCode();
-                                                Pane pane = qrlistView.getSelectionModel().getSelectedItem();
-                                                ImageView qrImageView = (ImageView) pane.lookup("#itemImageView");
-                                                Image image = qrImageView.getImage();
-                                                if (image != null) {
-                                                    try {
-                                                        String decoded = QRCodeUtils.DecodeToImage(image);
-                                                        String decompressed = CompressUtils.decompressText(CompressUtils.removeMarker(decoded));
-                                                        System.out.println(decompressed);
-                                                        editwebview.getEngine().executeScript("editor.setValue('" + StringEscapeUtils.escapeEcmaScript(decompressed) + "')");
-                                                    } catch (NotFoundException e) {
-                                                        e.printStackTrace();
-                                                        snackbar.show("QR코드를 인식하지 못하였습니다. 더 선명한 사진을 이용하세요.", 2000);
-                                                    } catch (IOException e) {
-                                                        e.printStackTrace();
-                                                    } catch (ChecksumException e) {
-                                                        e.printStackTrace();
-                                                    } catch (FormatException e) {
-                                                        snackbar.show("QR코드를 인식하지 못하였습니다. 더 선명한 사진을 이용하세요.", 2000);
-                                                        e.printStackTrace();
-                                                    }
-                                                }
-                                            }
-                                        });
-                                        open.setPadding(new Insets(10));
-                                        JFXButton save = new JFXButton("사진으로 저장");
-                                        save.setOnAction(new EventHandler<ActionEvent>() {
-                                            public void handle(ActionEvent event) {
-                                                try {
-                                                    Pane pane = qrlistView.getSelectionModel().getSelectedItem();
-                                                    ImageView qrImageView = (ImageView) pane.lookup("#itemImageView");
-                                                    Image image = qrImageView.getImage();
-                                                    if (image != null) {
-                                                        FileChooser fileChooser = new FileChooser();
-                                                        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("이미지", "*.png", "*.jpg", "*.bmp", "*.gif"));
-                                                        File tempFile = fileChooser.showSaveDialog(editwebview.getParent().getScene().getWindow());
-                                                        if (tempFile != null) {
-                                                            BufferedImage bufferedImage = SwingFXUtils.fromFXImage(image, null);
-                                                            ImageIO.write(bufferedImage, FilenameUtils.getExtension(tempFile.getName()), tempFile);
-                                                        }
-                                                    }
-                                                } catch (IOException e) {
-                                                    e.printStackTrace();
-                                                }
-                                            }
-                                        });
-                                        save.setPadding(new Insets(10));
-                                        JFXButton delete = new JFXButton("목록에서 삭제");
-                                        delete.setOnAction(new EventHandler<ActionEvent>() {
-                                            public void handle(ActionEvent event) {
-                                                qrlistView.getItems().remove(qrlistView.getSelectionModel().getSelectedIndex());
-                                                popup.close();
-                                            }
-                                        });
-                                        delete.setPadding(new Insets(10));
-                                        vBox.getChildren().add(open);
-                                        vBox.getChildren().add(save);
-                                        vBox.getChildren().add(delete);
-                                        popup.setContent(vBox);
-                                        popup.setSource(root);
-                                        popup.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX(), event.getY());
-                                    } else {
-                                        eraseSourceCode();
-                                        Pane pane = qrlistView.getSelectionModel().getSelectedItem();
-                                        ImageView qrImageView = (ImageView) pane.lookup("#itemImageView");
-                                        Image image = qrImageView.getImage();
-                                        if (image != null) {
-                                            try {
-                                                String decoded = QRCodeUtils.DecodeToImage(image);
-                                                String decompressed = CompressUtils.decompressText(CompressUtils.removeMarker(decoded));
-                                                System.out.println(decompressed);
-                                                editwebview.getEngine().executeScript("editor.setValue('" + StringEscapeUtils.escapeEcmaScript(decompressed) + "')");
-
-                                            } catch (NotFoundException e) {
-                                                e.printStackTrace();
-                                                snackbar.show("QR코드를 인식하지 못하였습니다. 더 선명한 사진을 이용하세요.", 2000);
-                                            } catch (IOException e) {
-                                                e.printStackTrace();
-                                            } catch (ChecksumException e) {
-                                                e.printStackTrace();
-                                            } catch (FormatException e) {
-                                                snackbar.show("QR코드를 인식하지 못하였습니다. 더 선명한 사진을 이용하세요.", 2000);
-
-                                                e.printStackTrace();
-                                            }
-                                        }
-                                    }
-                                }
-                            });
-                            qrlistView.getItems().
-                                    add(0, root);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                        qrlistView.getItems().add(0, getQRCodeListItem(decompressed, null, image));
                     } catch (NotFoundException e) {
                         e.printStackTrace();
                         snackbar.show("QR코드를 인식하지 못하였습니다. 더 선명한 사진을 이용하세요.", 2000);
@@ -551,13 +365,99 @@ public class Controller {
                         e.printStackTrace();
                     } catch (FormatException e) {
                         snackbar.show("QR코드를 인식하지 못하였습니다. 더 선명한 사진을 이용하세요.", 2000);
-
                         e.printStackTrace();
                     }
                 }
             }
         } catch (MalformedURLException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void saveQRCodeToFile() {
+        try {
+            Pane pane = qrlistView.getSelectionModel().getSelectedItem();
+            ImageView qrImageView = (ImageView) pane.lookup("#itemImageView");
+            Image image = qrImageView.getImage();
+            if (image != null) {
+                FileChooser fileChooser = new FileChooser();
+                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("이미지", "*.png", "*.jpg", "*.bmp", "*.gif"));
+                File tempFile = fileChooser.showSaveDialog(editwebview.getParent().getScene().getWindow());
+                if (tempFile != null) {
+                    BufferedImage bufferedImage = SwingFXUtils.fromFXImage(image, null);
+                    ImageIO.write(bufferedImage, FilenameUtils.getExtension(tempFile.getName()), tempFile);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Pane getQRCodeListItem(String content, String compressedText, Image image) {
+        try {
+            final Pane itemRoot = new FXMLLoader(getClass().getResource("qritem.fxml")).load();
+            ImageView imageView = (ImageView) itemRoot.lookup("#itemImageView");
+            Label projectName = (Label) itemRoot.lookup("#itemProjectName");
+            Label dateTime = (Label) itemRoot.lookup("#itemDateTime");
+            Label thumbnail = (Label) itemRoot.lookup("#itemContentThumbnail");
+            //final JFXPopup popup = (JFXPopup) root.lookup("#itemPopup");
+            if (compressedText == null) {
+                imageView.setImage(image);
+            } else {
+                imageView.setImage(QRCodeUtils.EncodeToQRCode(compressedText, 500, 500));
+            }
+            projectName.setText(workingSourceCodeFile != null ? workingSourceCodeFile.getName() : "No Title");
+            dateTime.setText(workingSourceCodeFile != null ? new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(workingSourceCodeFile.lastModified()) : new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+            if (content.length() < 100) {
+                thumbnail.setText(content.isEmpty() ? "내용 없음" : content);
+            } else {
+                thumbnail.setText(content.substring(0, 100));
+            }
+            itemRoot.setOnMouseClicked(new EventHandler<MouseEvent>() {
+                public void handle(MouseEvent event) {
+                    if (event.isPopupTrigger()) {   //마우스 오른쪽 클릭
+                        final JFXPopup popup = new JFXPopup();
+                        VBox vBox = new VBox();
+                        vBox.setStyle("-fx-background-color:#FFFFFF");
+                        JFXButton open = new JFXButton("  화면에 열기  ");
+                        open.setOnAction(new EventHandler<ActionEvent>() {
+                            public void handle(ActionEvent event) {
+                                loadQRCodeToEditor();
+                                popup.close();
+                            }
+                        });
+                        open.setPadding(new Insets(10));
+                        JFXButton save = new JFXButton("사진으로 저장");
+                        save.setOnAction(new EventHandler<ActionEvent>() {
+                            public void handle(ActionEvent event) {
+                                saveQRCodeToFile();
+                                popup.close();
+                            }
+                        });
+                        save.setPadding(new Insets(10));
+                        JFXButton delete = new JFXButton("목록에서 삭제");
+                        delete.setOnAction(new EventHandler<ActionEvent>() {
+                            public void handle(ActionEvent event) {
+                                qrlistView.getItems().remove(qrlistView.getSelectionModel().getSelectedIndex());
+                                popup.close();
+                            }
+                        });
+                        delete.setPadding(new Insets(10));
+                        vBox.getChildren().add(open);
+                        vBox.getChildren().add(save);
+                        vBox.getChildren().add(delete);
+                        popup.setContent(vBox);
+                        popup.setSource(itemRoot);
+                        popup.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX(), event.getY());
+                    } else {
+                        loadQRCodeToEditor();
+                    }
+                }
+            });
+            return itemRoot;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
@@ -570,152 +470,45 @@ public class Controller {
                 try {
                     byte[] compressedByte = CompressUtils.compressText(content);
                     final String compressedText = CompressUtils.addMarker(compressedByte);
-                    System.out.println("original: (" + content + content.length() + ")\n");
-                    System.out.println("compressed: (" + compressedText.length() + ")\n");
-                    System.out.println("decompressed: (" + CompressUtils.decompressText(CompressUtils.removeMarker(compressedText)) + CompressUtils.decompressText(CompressUtils.removeMarker(compressedText)).length() + ")\n");
-                    String decompressed = CompressUtils.decompressText(CompressUtils.removeMarker(compressedText));
-//                    System.out.println("DDDD" + decompressed);
                     Platform.runLater(new Runnable() {
                         public void run() {
                             if (compressedText.length() < 2900) {
-                                try {
-                                    final Pane root = new FXMLLoader(getClass().getResource("qritem.fxml")).load();
-                                    ImageView imageView = (ImageView) root.lookup("#itemImageView");
-                                    Label projectName = (Label) root.lookup("#itemProjectName");
-                                    Label dateTime = (Label) root.lookup("#itemDateTime");
-                                    Label thumbnail = (Label) root.lookup("#itemContentThumbnail");
-//                                    final JFXPopup popup = (JFXPopup) root.lookup("#itemPopup");
-                                    imageView.setImage(QRCodeUtils.EncodeToQRCode(compressedText, 500, 500));
-                                    projectName.setText(workingSourceCodeFile != null ? workingSourceCodeFile.getName() : "No Title");
-                                    dateTime.setText(workingSourceCodeFile != null ? new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(workingSourceCodeFile.lastModified()) : new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-                                    if (content.length() < 100) {
-                                        thumbnail.setText(content.isEmpty() ? "내용 없음" : content);
-                                    } else {
-                                        thumbnail.setText(content.substring(0, 100));
-                                    }
-                                    root.setOnMouseClicked(new EventHandler<MouseEvent>() {
-                                        public void handle(MouseEvent event) {
-                                            if (event.isPopupTrigger()) {
-                                                final JFXPopup popup = new JFXPopup();
-                                                VBox vBox = new VBox();
-                                                vBox.setStyle("-fx-background-color:#FFFFFF");
-                                                JFXButton open = new JFXButton("  화면에 열기  ");
-                                                open.setOnAction(new EventHandler<ActionEvent>() {
-                                                    public void handle(ActionEvent event) {
-                                                        eraseSourceCode();
-                                                        Pane pane = qrlistView.getSelectionModel().getSelectedItem();
-                                                        ImageView qrImageView = (ImageView) pane.lookup("#itemImageView");
-                                                        Image image = qrImageView.getImage();
-                                                        if (image != null) {
-                                                            try {
-                                                                String decoded = QRCodeUtils.DecodeToImage(image);
-                                                                String decompressed = CompressUtils.decompressText(CompressUtils.removeMarker(decoded));
-                                                                System.out.println(decompressed);
-                                                                editwebview.getEngine().executeScript("editor.setValue('" + StringEscapeUtils.escapeEcmaScript(decompressed) + "')");
-                                                            } catch (NotFoundException e) {
-                                                                e.printStackTrace();
-                                                                snackbar.show("QR코드를 인식하지 못하였습니다. 더 선명한 사진을 이용하세요.", 2000);
-                                                            } catch (IOException e) {
-                                                                e.printStackTrace();
-                                                            } catch (ChecksumException e) {
-                                                                e.printStackTrace();
-                                                            } catch (FormatException e) {
-                                                                snackbar.show("QR코드를 인식하지 못하였습니다. 더 선명한 사진을 이용하세요.", 2000);
-
-                                                                e.printStackTrace();
-                                                            }
-                                                        }
-                                                    }
-                                                });
-                                                open.setPadding(new Insets(10));
-                                                JFXButton save = new JFXButton("사진으로 저장");
-                                                save.setOnAction(new EventHandler<ActionEvent>() {
-                                                    public void handle(ActionEvent event) {
-                                                        try {
-                                                            Pane pane = qrlistView.getSelectionModel().getSelectedItem();
-                                                            ImageView qrImageView = (ImageView) pane.lookup("#itemImageView");
-                                                            Image image = qrImageView.getImage();
-                                                            if (image != null) {
-                                                                FileChooser fileChooser = new FileChooser();
-                                                                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("이미지", "*.png", "*.jpg", "*.bmp", "*.gif"));
-                                                                File tempFile = fileChooser.showSaveDialog(editwebview.getParent().getScene().getWindow());
-                                                                if (tempFile != null) {
-                                                                    BufferedImage bufferedImage = SwingFXUtils.fromFXImage(image, null);
-                                                                    ImageIO.write(bufferedImage, FilenameUtils.getExtension(tempFile.getName()), tempFile);
-                                                                }
-                                                            }
-                                                        } catch (IOException e) {
-                                                            e.printStackTrace();
-                                                        }
-                                                    }
-                                                });
-                                                save.setPadding(new Insets(10));
-                                                JFXButton delete = new JFXButton("목록에서 삭제");
-                                                delete.setOnAction(new EventHandler<ActionEvent>() {
-                                                    public void handle(ActionEvent event) {
-                                                        qrlistView.getItems().remove(qrlistView.getSelectionModel().getSelectedIndex());
-                                                        popup.close();
-                                                    }
-                                                });
-                                                delete.setPadding(new Insets(10));
-                                                vBox.getChildren().add(open);
-                                                vBox.getChildren().add(save);
-                                                vBox.getChildren().add(delete);
-                                                popup.setContent(vBox);
-                                                popup.setSource(root);
-                                                popup.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX(), event.getY());
-                                            } else {
-                                                eraseSourceCode();
-                                                Pane pane = qrlistView.getSelectionModel().getSelectedItem();
-                                                ImageView qrImageView = (ImageView) pane.lookup("#itemImageView");
-                                                Image image = qrImageView.getImage();
-                                                if (image != null) {
-                                                    try {
-                                                        String decoded = QRCodeUtils.DecodeToImage(image);
-                                                        String decompressed = CompressUtils.decompressText(CompressUtils.removeMarker(decoded));
-                                                        System.out.println(decompressed);
-                                                        editwebview.getEngine().executeScript("editor.setValue('" + StringEscapeUtils.escapeEcmaScript(decompressed) + "')");
-
-                                                    } catch (NotFoundException e) {
-                                                        e.printStackTrace();
-                                                        snackbar.show("QR코드를 인식하지 못하였습니다. 더 선명한 사진을 이용하세요.", 2000);
-
-                                                    } catch (IOException e) {
-                                                        e.printStackTrace();
-                                                    } catch (ChecksumException e) {
-                                                        e.printStackTrace();
-                                                    } catch (FormatException e) {
-                                                        snackbar.show("QR코드를 인식하지 못하였습니다. 더 선명한 사진을 이용하세요.", 2000);
-
-
-                                                        e.printStackTrace();
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    });
-                                    qrlistView.getItems().
-                                            add(0, root);
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
+                                qrlistView.getItems().add(0, getQRCodeListItem(content, compressedText, null));
                             } else {
                                 snackbar.show("문자가 너무커 QR코드로 만들지 못하였습니다.", 2000);
                             }
-
                         }
                     });
-
-
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
-
             }
-        }).
+        }).start();
+    }
 
-                start();
+    public void loadQRCodeToEditor() {
+        eraseSourceCode();
+        Pane pane = qrlistView.getSelectionModel().getSelectedItem();
+        ImageView qrImageView = (ImageView) pane.lookup("#itemImageView");
+        Image image = qrImageView.getImage();
+        if (image != null) {
+            try {
+                String decoded = QRCodeUtils.DecodeToImage(image);
+                String decompressed = CompressUtils.decompressText(CompressUtils.removeMarker(decoded));
+                System.out.println(decompressed);
+                editwebview.getEngine().executeScript("editor.setValue('" + StringEscapeUtils.escapeEcmaScript(decompressed) + "')");
+            } catch (NotFoundException e) {
+                e.printStackTrace();
+                snackbar.show("QR코드를 인식하지 못하였습니다. 더 선명한 사진을 이용하세요.", 2000);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ChecksumException e) {
+                e.printStackTrace();
+            } catch (FormatException e) {
+                snackbar.show("QR코드를 인식하지 못하였습니다. 더 선명한 사진을 이용하세요.", 2000);
+                e.printStackTrace();
+            }
+        }
     }
 
     private int saveSourceCode(int saveMode) {
@@ -749,82 +542,6 @@ public class Controller {
         return sourceCodeValue;
     }
 
-    /* private JFXDialog getCompileDialog() {
-         try {
-             JFXDialogLayout content = new JFXDialogLayout();
-             content.setHeading(new Text("컴파일하기"));
-             ((Text) content.getHeading().get(0)).setFont(Font.font("Roboto", 17));
-
-             Node body = new FXMLLoader(getClass().getResource("compileDialog.fxml")).load();
-             content.setBody(body);
-
-             compileDialog = new JFXDialog(root, content, JFXDialog.DialogTransition.CENTER);
-
-             final JFXTextArea compileInput = (JFXTextArea) body.lookup("#compileDialogInput");
-             final ComboBox<String> compileSyntax = (ComboBox<String>) body.lookup("#compileDialogSyntax");
-             for (Pair<String, Integer> p : availableLanguages) {
-                 compileSyntax.getItems().add(p.getLeft());
-             }
-             compileSyntax.setOnAction(new EventHandler<ActionEvent>() {
-                 public void handle(ActionEvent event) {
-                     compile_used_language = compileSyntax.getSelectionModel().getSelectedIndex();
-                 }
-             });
-
-             compileSyntax.getSelectionModel().select(compile_used_language);
-
-
-             JFXButton ok = (JFXButton) body.lookup("#compileDialogCompile");
-             ok.setOnAction(new EventHandler<ActionEvent>() {
-                 public void handle(ActionEvent event) {
-
-                     System.out.println("compile");
-                     String sourceCodeContent = getSourceCodeValueFromEditor();
-                     int compileLanguageCode = availableLanguages.get(compile_used_language).getRight();
-                     String compileInputContent = compileInput.getText();
-                     compileInputContent = (compileInputContent == null || compileInputContent.isEmpty()) ? "" : compileInputContent;
-                     String submissionQuery = QRHttpUtils.createSubmissionQuery(sourceCodeContent, compileLanguageCode, compileInputContent);
-                     System.out.println(submissionQuery);
-                     try {
-                         String respondId = QRHttpUtils.postSubmissionQuery(submissionQuery);
-                         JSONObject object = (JSONObject) new JSONParser().parse(respondId);
-                         System.out.println(object.get("id"));
-                         String result;
-                         while (true) {
-                             result = QRHttpUtils.getSubmissionResult(object.get("id").toString());
-                             if (QRHttpUtils.getProgessStatus(result)) {
-                                 break;
-                             }
-                             Thread.sleep(100);
-                         }
-
-                         System.out.println(result);
-
-
-                     } catch (URISyntaxException e) {
-                         e.printStackTrace();
-                     } catch (IOException e) {
-                         e.printStackTrace();
-                     } catch (ParseException e) {
-                         e.printStackTrace();
-                     } catch (InterruptedException e) {
-                         e.printStackTrace();
-                     }
-                 }
-             });
-             JFXButton cancel = (JFXButton) body.lookup("#compileDialogCancel");
-             cancel.setOnAction(new EventHandler<ActionEvent>() {
-                 public void handle(ActionEvent event) {
-                     compileDialog.close();
-                 }
-             });
-             return compileDialog;
-         } catch (IOException e) {
-             e.printStackTrace();
-             return null;
-         }
-     }
- */
     private void setListenerEditWebView(final WebView editwebview) {
         editwebview.setOnDragDropped(new EventHandler<DragEvent>() {
             public void handle(DragEvent event) {
@@ -870,7 +587,7 @@ public class Controller {
                     content = StringEscapeUtils.escapeEcmaScript(content);
                     String query = "editor.insert('" + content + "');";
 //                    TODO 빌드할때는 이거 꼭 지우기
-//                    editwebview.getEngine().executeScript(query);
+                    editwebview.getEngine().executeScript(query);
                 }
                 if (event.getCode() == KeyCode.ESCAPE) {
                     pressedEscape();
