@@ -14,9 +14,13 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.*;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -34,6 +38,8 @@ import org.json.simple.parser.ParseException;
 import org.mozilla.universalchardet.UniversalDetector;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.InetAddress;
@@ -394,7 +400,7 @@ public class Controller {
         }
     }
 
-    public Pane getQRCodeListItem(String content, Image image, String filename, String absoluteFilePath) {
+    public Pane getQRCodeListItem(String content, final Image image, String filename, String absoluteFilePath) {
         try {
             final Pane itemRoot = new FXMLLoader(getClass().getResource("qritem.fxml")).load();
             ImageView imageView = (ImageView) itemRoot.lookup("#itemImageView");
@@ -412,7 +418,7 @@ public class Controller {
                 if (workingSourceCodeFile != null) {
                     projectName.setText(workingSourceCodeFile.getName());
                     filePath.setText(workingSourceCodeFile.getAbsolutePath());
-                }else{
+                } else {
                     projectName.setText("No Title");
                     vBox.getChildren().remove(filePath);
                 }
@@ -453,9 +459,31 @@ public class Controller {
                             }
                         });
                         delete.setPadding(new Insets(10));
+
+                        JFXButton showBig = new JFXButton("    크게 보기    ");
+                        showBig.setOnAction(new EventHandler<ActionEvent>() {
+                            public void handle(ActionEvent event) {
+                                JFXDialogLayout content = new JFXDialogLayout();
+                                ImageView qrImageView = new ImageView(image);
+                                content.setBody(qrImageView);
+                                final JFXDialog qrdialog = new JFXDialog(root, content, JFXDialog.DialogTransition.CENTER);
+                                JFXButton button = new JFXButton("닫기");
+                                button.setStyle("-fx-text-fill: #2196F3;");
+                                button.setOnAction(new EventHandler<ActionEvent>() {
+                                    public void handle(ActionEvent event) {
+                                        qrdialog.close();
+                                    }
+                                });
+                                content.setActions(button);
+                                qrdialog.show();
+                                popup.close();
+                            }
+                        });
+                        showBig.setPadding(new Insets(10));
                         vBox.getChildren().add(open);
                         vBox.getChildren().add(save);
                         vBox.getChildren().add(delete);
+                        vBox.getChildren().add(showBig);
                         popup.setContent(vBox);
                         popup.setSource(itemRoot);
                         popup.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX(), event.getY());
@@ -476,11 +504,10 @@ public class Controller {
         final String content = getSourceCodeValueFromEditor();
         new Thread(new Runnable() {
             public void run() {
-                //TODO spinner requiered
                 try {
                     byte[] compressedByte = CompressUtils.compressText(content);
                     final String compressedText = CompressUtils.addMarker(compressedByte);
-                    final Image image = QRCodeUtils.EncodeToQRCode(compressedText, 500, 500);
+                    final Image image = QRCodeUtils.EncodeToQRCode(compressedText, 750, 750);
                     Platform.runLater(new Runnable() {
                         public void run() {
                             if (compressedText.length() < 2900) {
@@ -717,12 +744,64 @@ public class Controller {
                         popup.close();
                     }
                 });
+                open.setPadding(new Insets(10));
+
                 vBox.getChildren().add(open);
                 popup.setContent(vBox);
                 popup.setSource(qrlistView);
                 popup.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX(), event.getY());
             }
         });
+
+        this.qrlistView.setOnDragOver(new EventHandler<DragEvent>() {
+            public void handle(DragEvent event) {
+                if (event.getGestureSource() != qrlistView &&
+                        event.getDragboard().hasFiles()) {
+                    event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+                }
+                event.consume();
+            }
+        });
+
+       this.qrlistView.setOnDragDropped(new EventHandler<DragEvent>() {
+           public void handle(DragEvent event) {
+               Dragboard dragboard = event.getDragboard();
+               if (dragboard.hasFiles()) {
+                   for (File file : dragboard.getFiles()) {
+                       if (FilenameUtils.isExtension(file.getName(), new String[]{"png", "jpg", "gif", "bmp"})) {
+                           try {
+                               Image image = new Image(file.toURI().toURL().toExternalForm());
+                               if (image != null) {
+                                   try {
+                                       String decoded = QRCodeUtils.DecodeToImage(image);
+                                       String decompressed = CompressUtils.decompressText(CompressUtils.removeMarker(decoded));
+                                       System.out.println(decompressed);
+                                       editwebview.getEngine().executeScript("editor.setValue('" + StringEscapeUtils.escapeEcmaScript(decompressed) + "')");
+                                       stage.setTitle("QR Studio 1.0 - [" + file.getAbsolutePath() + "] - [" + file.getName() + "]");
+                                       qrlistView.getItems().add(0, getQRCodeListItem(decompressed, image, file.getName(), file.getAbsolutePath()));
+                                   } catch (NotFoundException e) {
+                                       e.printStackTrace();
+                                       snackbar.show("QR코드를 인식하지 못하였습니다. 더 선명한 사진을 이용하세요.", 2000);
+                                   } catch (IOException e) {
+                                       e.printStackTrace();
+                                   } catch (ChecksumException e) {
+                                       e.printStackTrace();
+                                   } catch (FormatException e) {
+                                       snackbar.show("QR코드를 인식하지 못하였습니다. 더 선명한 사진을 이용하세요.", 2000);
+                                       e.printStackTrace();
+                                   }
+                               }
+                           } catch (MalformedURLException e) {
+                               e.printStackTrace();
+                           }
+                       }else{
+                           snackbar.show("이미지 파일을 가져오시기 바랍니다.",2000);
+                       }
+                   }
+               }
+               event.consume();
+           }
+       });
     }
 
     private boolean eraseSourceCode() {
@@ -771,7 +850,19 @@ public class Controller {
         aboutDialog.show();
         editwebview.requestFocus();
     }
-
+    @FXML
+    void openComplexSetting(ActionEvent event){
+        System.out.println("SADF");
+        try {
+            editwebview.requestFocus();
+            new Robot().keyPress(java.awt.event.KeyEvent.VK_CONTROL);
+            new Robot().keyPress(java.awt.event.KeyEvent.VK_COMMA);
+            new Robot().keyRelease(java.awt.event.KeyEvent.VK_CONTROL);
+            new Robot().keyRelease(java.awt.event.KeyEvent.VK_COMMA);
+        } catch (AWTException e) {
+            e.printStackTrace();
+        }
+    }
     @FXML
     void closeQRCompiler(ActionEvent event) {
         try {

@@ -41,7 +41,6 @@ public class Main extends Application {
         primaryStage.setMinWidth(950);
         primaryStage.setScene(scene);
         primaryStage.show();
-        //TODO Beautify,Snippets scroll problem
     }
 
 
