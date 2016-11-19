@@ -99,15 +99,11 @@ public class QRHttpUtils {
         }
     }
 
-    public static boolean isExecuteDone(String result) throws ParseException {
+    public static double getProgessStatus(String result) throws ParseException {
         JSONObject object = (JSONObject) new JSONParser().parse(result);
         String status = object.get("status").toString();
         System.out.println("statusss: " + status);
-        if (status.equals("0")) {
-            return true;
-        } else {
-            return false;
-        }
+        return Double.parseDouble(status);
     }
 
     public static class SubmissionDetail {

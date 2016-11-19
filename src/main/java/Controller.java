@@ -3,7 +3,6 @@
  */
 
 import com.google.zxing.NotFoundException;
-import com.google.zxing.qrcode.QRCodeWriter;
 import com.jfoenix.controls.*;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
@@ -12,6 +11,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -42,7 +42,6 @@ import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 
 
 public class Controller {
@@ -340,7 +339,10 @@ public class Controller {
         tempCompileInputContent = (tempCompileInputContent == null || tempCompileInputContent.isEmpty()) ? "" : tempCompileInputContent;
         final String compileInputContent = tempCompileInputContent;
         final JFXSpinner spinner = new JFXSpinner();
+        final Label compileLabel = new Label("\n\n\n준비중...");
+
         consoleBar.getChildren().add(spinner);
+        consoleBar.getChildren().add(compileLabel);
         consoleBar.setDisable(true);
         compileButton.setDisable(true);
         new Thread(new Runnable() {
@@ -354,7 +356,29 @@ public class Controller {
                     String result;
                     while (true) {
                         result = QRHttpUtils.getSubmissionResult(object.get("id").toString());
-                        if (QRHttpUtils.isExecuteDone(result)) {
+                        double status = QRHttpUtils.getProgessStatus(result);
+                        if (status < 0) {
+                            Platform.runLater(new Runnable() {
+                                public void run() {
+                                    compileLabel.setText("\n\n\n준비중...");
+                                }
+                            });
+                        }
+                        if (status == 1) {
+                            Platform.runLater(new Runnable() {
+                                public void run() {
+                                    compileLabel.setText("\n\n\n컴파일중....");
+                                }
+                            });
+                        }
+                        if (status == 3) {
+                            Platform.runLater(new Runnable() {
+                                public void run() {
+                                    compileLabel.setText("\n\n\n실행중....");
+                                }
+                            });
+                        }
+                        if (status == 0) {
                             break;
                         }
                         Thread.sleep(100);
@@ -365,6 +389,7 @@ public class Controller {
                         public void run() {
                             consoleOutput.setText(detail.getOutputOrError());
                             consoleBar.getChildren().remove(spinner);
+                            consoleBar.getChildren().remove(compileLabel);
                             consoleBar.setDisable(false);
                             compileButton.setDisable(false);
                         }
@@ -686,7 +711,7 @@ public class Controller {
         return sourceCodeValue;
     }
 
-    private JFXDialog getCompileDialog() {
+   /* private JFXDialog getCompileDialog() {
         try {
             JFXDialogLayout content = new JFXDialogLayout();
             content.setHeading(new Text("컴파일하기"));
@@ -729,7 +754,7 @@ public class Controller {
                         String result;
                         while (true) {
                             result = QRHttpUtils.getSubmissionResult(object.get("id").toString());
-                            if (QRHttpUtils.isExecuteDone(result)) {
+                            if (QRHttpUtils.getProgessStatus(result)) {
                                 break;
                             }
                             Thread.sleep(100);
@@ -761,9 +786,8 @@ public class Controller {
             return null;
         }
     }
-
+*/
     private void setListenerEditWebView(final WebView editwebview) {
-
         editwebview.setOnDragDropped(new EventHandler<DragEvent>() {
             public void handle(DragEvent event) {
                 Dragboard dragboard = event.getDragboard();
@@ -808,7 +832,7 @@ public class Controller {
                     content = StringEscapeUtils.escapeEcmaScript(content);
                     String query = "editor.insert('" + content + "');";
 //                    TODO 빌드할때는 이거 꼭 지우기
-                    editwebview.getEngine().executeScript(query);
+//                    editwebview.getEngine().executeScript(query);
                 }
                 if (event.getCode() == KeyCode.ESCAPE) {
                     pressedEscape();
