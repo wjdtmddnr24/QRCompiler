@@ -48,7 +48,7 @@
                                                                                                   <ComboBox fx:id="comboBoxFont" promptText="Monospaced" style="-fx-fill-text: #000000;" />
                                                                                                   <ComboBox fx:id="comboBoxSize" promptText="size" visibleRowCount="12" />
                                                                                                   <ComboBox fx:id="comboBoxLanguage" prefWidth="130.0" promptText="언어" />
-                                                                                                  <JFXButton onAction="#openComplexSetting" text="고급 설정"  />
+                                                                                                  <JFXButton onAction="#openComplexSetting" textFill="#646464" text="고급 설정"  />
                                                                            </children>
                                                                            <opaqueInsets>
                                                                               <Insets />
